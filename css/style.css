@@ -665,6 +665,7 @@ body {
   line-height: 1.6;
 }
 .caution strong { color: var(--ng); }
+.version { margin: 10px 0 0; font-size: .75rem; font-weight: 800; color: var(--muted); }
 
 /* ---------- プレイ画面 ---------- */
 .hud { margin-bottom: 10px; }
