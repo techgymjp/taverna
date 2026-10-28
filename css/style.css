@@ -665,7 +665,20 @@ body {
   line-height: 1.6;
 }
 .caution strong { color: var(--ng); }
-.version { margin: 10px 0 0; font-size: .75rem; font-weight: 800; color: var(--muted); }
+.version {
+  position: fixed;
+  top: 12px;
+  left: 10px;
+  z-index: 10;
+  margin: 0;
+  padding: 3px 10px;
+  font-size: .8rem;
+  font-weight: 900;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
 
 /* ---------- プレイ画面 ---------- */
 .hud { margin-bottom: 10px; }
