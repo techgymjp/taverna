@@ -742,9 +742,9 @@ body {
 }
 .plot .sprout { display: block; width: 100%; height: 100%; transform-origin: 50% 92%; }
 .plot svg { display: block; width: 100%; height: 100%; }
-/* 植物は大きく描く（上のマスにはみ出してよい。左右と下ははみ出さない） */
+/* 植物は大きく描く（1.85倍）（上のマスにはみ出してよい。左右と下ははみ出さない） */
 .field-wrap[data-stage="herb"] .plot .sprout { clip-path: inset(-120% 0 0 0); }
-.field-wrap[data-stage="herb"] .plot svg { transform: scale(1.5); transform-origin: 50% 94%; }
+.field-wrap[data-stage="herb"] .plot svg { transform: scale(1.85); transform-origin: 50% 94%; }
 .plot.grow, .plot.wilt { z-index: 1; }
 .plot.grow .sprout { animation: sprout .35s cubic-bezier(.2, 1.6, .5, 1); }
 .plot.wilt .sprout { transition: transform .7s, opacity .7s, filter .7s; transform: scaleY(.8) rotate(6deg); opacity: .55; filter: grayscale(.6); }
