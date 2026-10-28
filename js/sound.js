@@ -122,6 +122,16 @@ const Sound = (() => {
     start(t) {
       ['C5', 'E5', 'G5', 'C6'].forEach((n, i) => tone(seGain, freq(n), t + i * 0.07, 0.16, { vol: 0.22 }));
     },
+    // 出発：狩りの角笛「パッパラパーン！」＋太鼓
+    depart(t) {
+      const horn = [['G4', 0, 0.12], ['G4', 0.14, 0.12], ['C5', 0.28, 0.12], ['E5', 0.42, 0.12], ['G5', 0.56, 0.5]];
+      horn.forEach(([n, d, len]) => {
+        buzz(seGain, freq(n), t + d, len, { vol: 0.2, detune: 1.004, cutoff: 2600 });
+        tone(seGain, freq(n) * 2, t + d, len, { type: 'triangle', vol: 0.08 });
+      });
+      [0, 0.28, 0.56].forEach((d) => tone(seGain, 110, t + d, 0.18, { type: 'sine', vol: 0.6, slide: 0.45 }));
+      noise(seGain, t + 0.56, 0.4, 0.15, 5000); // シンバル
+    },
     // 収穫：「ぽんっ」と抜ける音＋葉っぱのこすれる音＋きらりと鈴の音
     // 連続で収穫するほど、鈴がドレミソラの音階で上がっていく
     harvest(t, combo = 1, special = false) {

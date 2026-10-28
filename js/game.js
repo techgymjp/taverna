@@ -394,8 +394,7 @@
 
   function start() {
     if (!isUnlocked(state.stage)) state.stage = 'herb';
-    Sound.play('start');
-    Sound.startBgm();
+    Sound.play('depart');
     Object.assign(state, {
       running: false, paused: false, elapsed: 0, nextSpawn: 0, nextOrder: 0, shownLevel: 1,
       score: 0, lives: LIVES, combo: 0, maxCombo: 0, harvested: 0, order: null, basket: {}, mistakes: [], marks: [],
@@ -410,11 +409,17 @@
     const intro = `${st.place}に着いたぞ！${st.desc}`;
     $('order').textContent = intro;
     setHunter('play-hunter', 'normal');
-    Sound.say(intro);
-    countdown(3);
+    // 出発のファンファーレを聞かせてから、ハンターのひとことと3・2・1
+    clearTimeout(start.timer);
+    start.timer = setTimeout(() => {
+      Sound.say(intro);
+      countdown(3);
+    }, 1100);
   }
 
   function countdown(n) {
+    // カウントダウン中に小屋へ戻ったら止める
+    if (!$('screen-play').classList.contains('active')) return;
     const el = $('countdown');
     el.hidden = false;
     el.textContent = n || 'スタート！';
@@ -426,6 +431,7 @@
       setTimeout(() => countdown(n - 1), 750);
     } else {
       setTimeout(() => { el.hidden = true; }, 500);
+      Sound.startBgm();
       state.running = true;
       state.last = performance.now();
       state.nextOrder = 600;
