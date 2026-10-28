@@ -745,6 +745,9 @@ body {
 /* 植物は大きく描く（1.85倍）（上のマスにはみ出してよい。左右と下ははみ出さない） */
 .field-wrap[data-stage="herb"] .plot .sprout { clip-path: inset(-120% 0 0 0); }
 .field-wrap[data-stage="herb"] .plot svg { transform: scale(1.85); transform-origin: 50% 94%; }
+/* きのこも大きく（1.6倍）。丸太や幹は左右が切れてもよい */
+.field-wrap[data-stage="kinoko"] .plot .sprout { clip-path: inset(-120% 0 0 0); }
+.field-wrap[data-stage="kinoko"] .plot svg { transform: scale(1.6); transform-origin: 50% 94%; }
 .plot.grow, .plot.wilt { z-index: 1; }
 .plot.grow .sprout { animation: sprout .35s cubic-bezier(.2, 1.6, .5, 1); }
 .plot.wilt .sprout { transition: transform .7s, opacity .7s, filter .7s; transform: scaleY(.8) rotate(6deg); opacity: .55; filter: grayscale(.6); }
