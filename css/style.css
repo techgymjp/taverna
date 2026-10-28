@@ -900,3 +900,7 @@ body {
   .sp { grid-template-columns: 88px 1fr; gap: 10px; padding: 10px; }
   .stage .icon { font-size: 1.6rem; }
 }
+
+/* 音のテスト */
+.sound-test { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px 12px; margin: 8px 0 0; font-weight: 800; font-size: .85rem; }
+.btn.small { font-size: .85rem; padding: 6px 14px; box-shadow: 3px 3px 0 var(--ink); }

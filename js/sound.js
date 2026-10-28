@@ -37,7 +37,9 @@ const Sound = (() => {
   // 画面に触れるたびに、止まっている音を再開する（ブラウザは「操作のあと」でないと音を出せない）
   ['pointerdown', 'touchend', 'click', 'keydown'].forEach((ev) => {
     document.addEventListener(ev, () => {
-      if (settings.se || settings.bgm) init();
+      if (!settings.se && !settings.bgm) return;
+      init();
+      if (wanted && !timer) startBgm(wanted);
     }, { capture: true, passive: true });
   });
 
@@ -215,58 +217,93 @@ const Sound = (() => {
   }
 
   // ---------- BGM ----------
-  const TEMPO = 150;
-  const STEP = 60 / TEMPO / 2; // 8分音符
   // 8小節 × 8分音符8つ（'-' は休符）
-  const MELODY = (
-    'E5 - G5 E5 C5 - D5 E5 ' +
-    '- C5 A4 - C5 E5 D5 - ' +
-    'F5 - A5 F5 C5 - F5 E5 ' +
-    'D5 - B4 G4 - B4 D5 - ' +
-    'G5 - E5 G5 C6 - B5 A5 ' +
-    'G5 - E5 - C5 D5 E5 - ' +
-    'F5 E5 D5 C5 A4 - C5 D5 ' +
-    'G4 - B4 D5 G5 - - -'
-  ).split(' ');
-  const CHORDS = [['C3', 'G3'], ['A2', 'E3'], ['F2', 'C3'], ['G2', 'D3'], ['C3', 'G3'], ['A2', 'E3'], ['F2', 'C3'], ['G2', 'D3']];
-  const ARP = [['C4', 'E4', 'G4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['G3', 'B3', 'D4'], ['C4', 'E4', 'G4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['G3', 'B3', 'D4']];
+  const notes = (str) => str.trim().split(/\s+/);
+  const TRACKS = {
+    // タイトル：ゆったりした「山の朝」（ト長調のペンタトニック、笛のような音）
+    title: {
+      tempo: 104,
+      melody: notes(`
+        G4 - B4 D5 E5 - D5 B4   A4 - - B4 G4 - - -
+        E4 - G4 A4 B4 - A4 G4   A4 - - - - - - -
+        G4 - B4 D5 E5 - G5 E5   D5 - - B4 D5 - - -
+        E5 D5 B4 A4 G4 - A4 B4  G4 - - - - - - -`),
+      chords: [['G2', 'D3'], ['D2', 'A2'], ['C3', 'G3'], ['D2', 'A2'], ['G2', 'D3'], ['E2', 'B2'], ['C3', 'G3'], ['G2', 'D3']],
+      arp: [['G3', 'B3', 'D4'], ['D3', 'F#3', 'A3'], ['C4', 'E4', 'G4'], ['D3', 'F#3', 'A3'], ['G3', 'B3', 'D4'], ['E3', 'G3', 'B3'], ['C4', 'E4', 'G4'], ['G3', 'B3', 'D4']],
+      play(i, t, STEP, bar, beat, m) {
+        if (m !== '-') {
+          tone(bgmGain, freq(m), t, STEP * 1.8, { type: 'triangle', vol: 0.32, attack: 0.03 });
+          tone(bgmGain, freq(m) * 2, t, STEP * 1.2, { type: 'sine', vol: 0.06, attack: 0.03 });
+        }
+        if (beat === 0 || beat === 4) tone(bgmGain, freq(this.chords[bar][beat ? 1 : 0]), t, STEP * 3.5, { type: 'sine', vol: 0.5, attack: 0.02 });
+        // ぽろんと鳴らすアルペジオ
+        const a = this.arp[bar];
+        tone(bgmGain, freq(a[[0, 1, 2, 1][beat % 4]]), t, STEP * 1.5, { type: 'triangle', vol: 0.07 });
+        if (beat % 2 === 1) noise(bgmGain, t, 0.05, 0.05, 6000); // シェイカー
+      },
+    },
+    // ゲーム中：テンポのよい曲
+    play: {
+      tempo: 150,
+      melody: notes(`
+        E5 - G5 E5 C5 - D5 E5   - C5 A4 - C5 E5 D5 -
+        F5 - A5 F5 C5 - F5 E5   D5 - B4 G4 - B4 D5 -
+        G5 - E5 G5 C6 - B5 A5   G5 - E5 - C5 D5 E5 -
+        F5 E5 D5 C5 A4 - C5 D5  G4 - B4 D5 G5 - - -`),
+      chords: [['C3', 'G3'], ['A2', 'E3'], ['F2', 'C3'], ['G2', 'D3'], ['C3', 'G3'], ['A2', 'E3'], ['F2', 'C3'], ['G2', 'D3']],
+      arp: [['C4', 'E4', 'G4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['G3', 'B3', 'D4'], ['C4', 'E4', 'G4'], ['A3', 'C4', 'E4'], ['F3', 'A3', 'C4'], ['G3', 'B3', 'D4']],
+      play(i, t, STEP, bar, beat, m) {
+        if (m !== '-') tone(bgmGain, freq(m), t, STEP * 0.9, { vol: 0.22 });
+        // ベース：オクターブで跳ねる
+        const [root, fifth] = this.chords[bar];
+        const bass = beat % 2 === 0 ? root : (beat % 4 === 1 ? fifth : root.replace(/\d/, (d) => Number(d) + 1));
+        tone(bgmGain, freq(bass), t, STEP * 0.8, { type: 'triangle', vol: 0.5 });
+        // 裏拍のコード
+        if (beat % 2 === 1) this.arp[bar].forEach((n) => tone(bgmGain, freq(n), t, STEP * 0.5, { type: 'square', vol: 0.05 }));
+        // リズム
+        if (beat % 4 === 0) tone(bgmGain, 120, t, 0.12, { type: 'sine', vol: 0.7, slide: 0.4 });
+        if (beat % 4 === 2) noise(bgmGain, t, 0.1, 0.25, 2000);
+        noise(bgmGain, t, 0.03, 0.12);
+      },
+    },
+  };
 
-  let timer = null, step = 0, nextTime = 0;
-
-  function scheduleStep(i, t) {
-    const bar = Math.floor(i / 8) % 8, beat = i % 8;
-    const m = MELODY[i % MELODY.length];
-    if (m !== '-') tone(bgmGain, freq(m), t, STEP * 0.9, { vol: 0.22 });
-    // ベース：オクターブで跳ねる
-    const [root, fifth] = CHORDS[bar];
-    const bass = beat % 2 === 0 ? root : (beat % 4 === 1 ? fifth : root.replace(/\d/, (d) => Number(d) + 1));
-    tone(bgmGain, freq(bass), t, STEP * 0.8, { type: 'triangle', vol: 0.5 });
-    // 裏拍のコード
-    if (beat % 2 === 1) ARP[bar].forEach((n) => tone(bgmGain, freq(n), t, STEP * 0.5, { type: 'square', vol: 0.05 }));
-    // リズム
-    if (beat % 4 === 0) tone(bgmGain, 120, t, 0.12, { type: 'sine', vol: 0.7, slide: 0.4 });
-    if (beat % 4 === 2) noise(bgmGain, t, 0.1, 0.25, 2000);
-    noise(bgmGain, t, 0.03, 0.12);
-  }
+  let timer = null, step = 0, nextTime = 0, current = null;
+  let wanted = null; // 流したい曲（ブラウザが音を許可するまで待つ）
 
   function tick() {
+    const tr = TRACKS[current];
+    const STEP = 60 / tr.tempo / 2; // 8分音符
     while (nextTime < ctx.currentTime + 0.15) {
-      scheduleStep(step, nextTime);
+      const bar = Math.floor(step / 8) % 8, beat = step % 8;
+      tr.play(step, nextTime, STEP, bar, beat, tr.melody[step % tr.melody.length]);
       step = (step + 1) % 64;
       nextTime += STEP;
     }
   }
 
-  function startBgm() {
-    if (!settings.bgm || timer || !init()) return;
+  // 曲を流す（別の曲が流れていれば切り替える）。
+  // まだ画面に一度も触れていないときは、最初のクリック・タップで流れ始める。
+  function startBgm(track = 'play') {
+    wanted = track;
+    if (!settings.bgm || !ctx) return;
+    if (timer && current === track) return;
+    stopTimer();
+    init();
+    current = track;
     step = 0;
     nextTime = ctx.currentTime + 0.1;
     timer = setInterval(tick, 30);
   }
 
-  function stopBgm() {
+  function stopTimer() {
     clearInterval(timer);
     timer = null;
+  }
+
+  function stopBgm() {
+    stopTimer();
+    wanted = null;
   }
 
   // 結果発表のファンファーレ中は BGM を小さくする
@@ -285,9 +322,9 @@ const Sound = (() => {
     save();
     if (on) {
       if (init()) bgmGain.gain.value = BGM_VOL;
-      startBgm();
+      startBgm(wanted || current || 'title');
     } else {
-      stopBgm();
+      stopTimer();
     }
   }
 
@@ -328,8 +365,17 @@ const Sound = (() => {
     if (!on && synth) synth.cancel();
   }
 
+  // 音のテスト：ドミソを鳴らし、ブラウザの音の状態を返す
+  async function test() {
+    if (!init()) return 'このブラウザは効果音（Web Audio）に対応していません';
+    try { await ctx.resume(); } catch { /* 状態の表示で分かる */ }
+    ['C5', 'E5', 'G5', 'C6'].forEach((n, i) => tone(seGain, freq(n), ctx.currentTime + 0.05 + i * 0.12, 0.3, { type: 'triangle', vol: 0.4 }));
+    const state = { running: '再生できる状態', suspended: 'ブラウザに止められている', interrupted: '他のアプリに止められている', closed: '終了している' }[ctx.state] || ctx.state;
+    return `音の状態：${state}（効果音 ${settings.se ? 'ON' : 'OFF'}・BGM ${settings.bgm ? 'ON' : 'OFF'}）`;
+  }
+
   return {
-    play, startBgm, stopBgm, duck, setBgm, setSe, say, setVoice,
+    play, test, startBgm, stopBgm, duck, setBgm, setSe, say, setVoice,
     get voice() { return settings.voice; },
     get bgm() { return settings.bgm; },
     get se() { return settings.se; },

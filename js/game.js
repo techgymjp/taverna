@@ -141,6 +141,7 @@
     $('title-hunter').innerHTML = hunterSvg('happy');
     renderStages();
     show('title');
+    Sound.startBgm('title');
   }
 
   function renderStages() {
@@ -414,6 +415,7 @@
 
   function start() {
     if (!isUnlocked(state.stage)) state.stage = 'herb';
+    Sound.stopBgm();
     Sound.play('depart');
     Object.assign(state, {
       running: false, paused: false, elapsed: 0, nextSpawn: 0, nextOrder: 0, shownLevel: 1,
@@ -452,7 +454,7 @@
       setTimeout(() => countdown(n - 1), 750);
     } else {
       setTimeout(() => { el.hidden = true; }, 500);
-      Sound.startBgm();
+      Sound.startBgm('play');
       state.running = true;
       state.last = performance.now();
       state.nextOrder = 600;
@@ -521,6 +523,11 @@
 
     Sound.stopBgm();
     Sound.play('fanfare', win);
+    // ファンファーレのあとは、タイトルの曲に戻す
+    clearTimeout(finish.bgm);
+    finish.bgm = setTimeout(() => {
+      if ($('screen-result').classList.contains('active')) Sound.startBgm('title');
+    }, 2800);
     setTimeout(() => Sound.say(rank.msg), 1500);
     if (win) {
       confetti(null, 60);
@@ -679,7 +686,6 @@
   function home() {
     state.running = false;
     cancelAnimationFrame(state.raf);
-    Sound.stopBgm();
     Sound.play('tap');
     renderTitle();
   }
@@ -707,6 +713,10 @@
   nameInput.value = Ranking.getName();
   nameInput.addEventListener('input', () => Ranking.setName(nameInput.value));
   $('btn-zukan-back').addEventListener('click', home);
+  $('btn-sound-test').addEventListener('click', async () => {
+    $('sound-test-result').textContent = await Sound.test();
+    Sound.say('音のテストだ。聞こえるか？');
+  });
 
   renderTitle();
 })();
