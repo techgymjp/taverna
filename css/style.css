@@ -694,7 +694,7 @@ body {
 
 .chef.small { width: 72px; height: 72px; }
 .chef.angry { background: #ff8a7a; animation: shake .4s; }
-.order { margin-bottom: 12px; }
+.order { position: relative; z-index: 5; margin-bottom: 12px; } /* はみ出した草より吹き出しを手前に */
 .order .bubble { min-height: 3.4em; font-size: clamp(.95rem, 4vw, 1.2rem); }
 .order .bubble small { display: block; font-size: .75rem; color: var(--muted); }
 
@@ -745,8 +745,9 @@ body {
 .plot svg { display: block; width: 100%; height: 100%; }
 /* 植物は大きく描く（1.85倍）。土のマスの外へはみ出してよい */
 .field-wrap[data-stage="herb"] .plot svg { transform: scale(1.85); transform-origin: 50% 94%; }
-/* きのこも大きく（1.6倍）。マスの外へはみ出してよい */
-.field-wrap[data-stage="kinoko"] .plot svg { transform: scale(1.6); transform-origin: 50% 94%; }
+/* きのこも大きく（1.95倍）。マスの外へはみ出してよい */
+.field-wrap[data-stage="kinoko"] .plot svg { transform: scale(1.95); transform-origin: 50% 94%; }
+.field-wrap[data-stage="kinoko"] .plot .sprout[data-wood] svg { transform: scale(1.35); }
 .plot .sprout { position: relative; z-index: 2; } /* 草はどのマスの土よりも手前に */
 .plot.grow .sprout { animation: sprout .35s cubic-bezier(.2, 1.6, .5, 1); }
 .plot.wilt .sprout { transition: transform .7s, opacity .7s, filter .7s; transform: scaleY(.8) rotate(6deg); opacity: .55; filter: grayscale(.6); }

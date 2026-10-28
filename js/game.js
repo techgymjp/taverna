@@ -245,7 +245,9 @@
     const t = state.elapsed / TIME;
     const life = lerp(3600, 2200, t) * (0.85 + Math.random() * 0.3);
     cell.item = { sp, born: state.elapsed, life };
-    cell.el.innerHTML = `<span class="sprout">${Art.render(sp)}</span>`;
+    // 丸太・木の幹に生えるきのこは、幹が畑の外へ飛び出さないよう控えめに拡大する
+    const onWood = sp.stage === 'kinoko' && (sp.look.on || ['shelf', 'bracket'].includes(sp.look.form));
+    cell.el.innerHTML = `<span class="sprout"${onWood ? ' data-wood' : ''}>${Art.render(sp)}</span>`;
     cell.el.className = 'plot grow';
     cell.el.setAttribute('aria-label', 'なにか生えている');
   }
@@ -562,7 +564,8 @@
   }
 
   // ---------- SNS シェア ----------
-  const SHARE_URL = 'https://techgymjp.github.io/taverna/';
+  // シェアするリンク先（ゲームの紹介記事）
+  const SHARE_URL = 'https://techgym.jp/column/claude-code-game-taverna/';
   const HASHTAG = '食べるな危険';
   let shareText = '';
 
