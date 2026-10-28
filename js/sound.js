@@ -55,8 +55,47 @@ const Sound = (() => {
     o.stop(t + dur + 0.02);
   }
 
+  // 濁った音（ブザー用）：わずかにずらした2つの音を重ねてうなりを出し、ローパスでこもらせる
+  function buzz(out, f, t, dur, { type = 'sawtooth', vol = 0.2, detune = 1.06, cutoff = 1400, slide = 1, wobble = 0 } = {}) {
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = cutoff;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.setValueAtTime(vol, t + dur * 0.75);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    filter.connect(g).connect(out);
+    [1, detune].forEach((m) => {
+      const o = ctx.createOscillator();
+      o.type = type;
+      o.frequency.setValueAtTime(f * m, t);
+      if (slide !== 1) o.frequency.exponentialRampToValueAtTime(f * m * slide, t + dur);
+      if (wobble) {
+        // 気持ち悪いゆらぎ
+        const lfo = ctx.createOscillator();
+        const depth = ctx.createGain();
+        lfo.frequency.value = wobble;
+        depth.gain.value = f * 0.08;
+        lfo.connect(depth).connect(o.frequency);
+        lfo.start(t);
+        lfo.stop(t + dur + 0.02);
+      }
+      o.connect(filter);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    });
+  }
+
+  // 鈴の音：基音に倍音を重ね、余韻を長めに
+  function bell(out, f, t, vol = 0.18, dur = 0.6) {
+    tone(out, f, t, dur, { type: 'sine', vol, attack: 0.004 });
+    tone(out, f * 2, t, dur * 0.5, { type: 'sine', vol: vol * 0.35, attack: 0.004 });
+    tone(out, f * 3, t, dur * 0.25, { type: 'sine', vol: vol * 0.12, attack: 0.004 });
+  }
+
   let noiseBuf = null;
-  function noise(out, t, dur, vol, hp = 6000) {
+  function noise(out, t, dur, vol, hp = 6000, type = 'highpass') {
     if (!noiseBuf) {
       noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
       const d = noiseBuf.getChannelData(0);
@@ -65,7 +104,7 @@ const Sound = (() => {
     const s = ctx.createBufferSource();
     s.buffer = noiseBuf;
     const filter = ctx.createBiquadFilter();
-    filter.type = 'highpass';
+    filter.type = type;
     filter.frequency.value = hp;
     const g = ctx.createGain();
     g.gain.setValueAtTime(vol, t);
@@ -83,24 +122,35 @@ const Sound = (() => {
     start(t) {
       ['C5', 'E5', 'G5', 'C6'].forEach((n, i) => tone(seGain, freq(n), t + i * 0.07, 0.16, { vol: 0.22 }));
     },
-    // 収穫：ぽん！（連続で少しずつ音程が上がる）
-    harvest(t, combo = 1) {
-      const up = Math.pow(2, Math.min(combo - 1, 12) / 12);
-      tone(seGain, freq('G5') * up, t, 0.08, { type: 'triangle', vol: 0.35, slide: 1.5 });
-      tone(seGain, freq('D6') * up, t + 0.06, 0.16, { vol: 0.18 });
+    // 収穫：「ぽんっ」と抜ける音＋葉っぱのこすれる音＋きらりと鈴の音
+    // 連続で収穫するほど、鈴がドレミソラの音階で上がっていく
+    harvest(t, combo = 1, special = false) {
+      tone(seGain, 900, t, 0.07, { type: 'sine', vol: 0.4, attack: 0.002, slide: 0.35 });
+      noise(seGain, t, 0.06, 0.12, 2500, 'bandpass');
+      const scale = ['C6', 'D6', 'E6', 'G6', 'A6', 'C7', 'D7', 'E7'];
+      const n = freq(scale[Math.min(combo - 1, scale.length - 1)]);
+      bell(seGain, n, t + 0.04, 0.16, 0.5);
+      bell(seGain, n * 1.5, t + 0.1, 0.1, 0.6);
+      if (special) {
+        // 注文の品：キラキラ〜ン
+        ['C6', 'E6', 'G6', 'C7', 'E7'].forEach((m, i) => bell(seGain, freq(m), t + 0.16 + i * 0.06, 0.1, 0.7));
+      }
     },
-    // 雑草を採ったとき：ぶっぶー
+    // 雑草を採ったとき：濁ったブザーで「ブブーッ」
     miss(t) {
-      tone(seGain, 180, t, 0.16, { type: 'sawtooth', vol: 0.2 });
-      tone(seGain, 140, t + 0.2, 0.3, { type: 'sawtooth', vol: 0.2, slide: 0.8 });
+      buzz(seGain, 98, t, 0.18, { vol: 0.28, detune: 1.06 });
+      buzz(seGain, 92, t + 0.22, 0.42, { vol: 0.28, detune: 1.06, slide: 0.8 });
+      noise(seGain, t, 0.12, 0.12, 400, 'lowpass');
     },
-    // 毒を採ったとき：警報
+    // 毒を採ったとき：耳ざわりな不協和音の警報＋気持ち悪い「おえ〜」
     poison(t) {
       for (let i = 0; i < 3; i++) {
-        tone(seGain, 880, t + i * 0.18, 0.09, { type: 'square', vol: 0.2 });
-        tone(seGain, 620, t + i * 0.18 + 0.09, 0.09, { type: 'square', vol: 0.2 });
+        const u = t + i * 0.16;
+        tone(seGain, freq('A5'), u, 0.12, { type: 'square', vol: 0.12 });
+        tone(seGain, freq('A#5'), u, 0.12, { type: 'square', vol: 0.12 }); // 半音ぶつけて不快に
       }
-      tone(seGain, 110, t, 0.6, { type: 'sawtooth', vol: 0.25, slide: 0.5 });
+      buzz(seGain, 140, t + 0.48, 0.7, { vol: 0.3, detune: 1.03, cutoff: 900, slide: 0.45, wobble: 9 });
+      noise(seGain, t + 0.48, 0.3, 0.1, 300, 'lowpass');
     },
     order(t) {
       tone(seGain, freq('E6'), t, 0.1, { type: 'sine', vol: 0.3 });

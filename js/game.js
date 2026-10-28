@@ -283,7 +283,7 @@
       state.marks.push(isOrder ? '⭐' : '🌿');
       floatText(cell, `+${pts}`, isOrder ? 'order' : 'ok');
       clearCell(cell, 'picked');
-      Sound.play('harvest', state.combo);
+      Sound.play('harvest', state.combo, isOrder);
       if (isOrder) {
         confetti(cell.el, 30);
         const line = fill(pick(ORDER_DONE), { n: sp.name });
