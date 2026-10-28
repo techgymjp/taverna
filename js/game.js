@@ -426,7 +426,8 @@
     el.classList.remove('pop');
     void el.offsetWidth;
     el.classList.add('pop');
-    Sound.play(n ? 'count' : 'go');
+    if (n) Sound.play('count', n);
+    else Sound.play('go');
     if (n) {
       setTimeout(() => countdown(n - 1), 750);
     } else {

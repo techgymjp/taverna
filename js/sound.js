@@ -169,12 +169,21 @@ const Sound = (() => {
     tick(t) {
       tone(seGain, 1200, t, 0.05, { type: 'square', vol: 0.12 });
     },
-    count(t) {
-      tone(seGain, freq('A5'), t, 0.14, { type: 'square', vol: 0.2 });
+    // 3・2・1：はっきりした「ピッ」（数字が減るほど少し高く）
+    count(t, n = 3) {
+      const f = freq(['A5', 'A5', 'B5', 'C#6'][n] || 'A5');
+      tone(seGain, f, t, 0.22, { type: 'square', vol: 0.22, attack: 0.003 });
+      tone(seGain, f * 2, t, 0.12, { type: 'sine', vol: 0.18, attack: 0.003 });
+      tone(seGain, 1800, t, 0.03, { type: 'triangle', vol: 0.25 }); // カチッ
     },
+    // スタート：「ポーン！」と高く響く和音＋太鼓
     go(t) {
-      tone(seGain, freq('A6'), t, 0.35, { type: 'square', vol: 0.22 });
-      tone(seGain, freq('E6'), t, 0.35, { type: 'triangle', vol: 0.2 });
+      ['A5', 'C#6', 'E6', 'A6'].forEach((n, i) => {
+        tone(seGain, freq(n), t + i * 0.015, 0.7, { type: 'square', vol: 0.12, attack: 0.003 });
+        tone(seGain, freq(n) * 2, t + i * 0.015, 0.5, { type: 'sine', vol: 0.06 });
+      });
+      tone(seGain, 120, t, 0.25, { type: 'sine', vol: 0.7, slide: 0.4 });
+      noise(seGain, t, 0.35, 0.15, 5000);
     },
     fanfare(t, good = true) {
       const seq = good
