@@ -895,12 +895,26 @@ body {
 .sp-name .lv[data-level="3"] { background: var(--purple); }
 .review .sp { text-align: left; }
 
+/* 図鑑は「大きな絵を上、説明を下」のカードを並べる */
+#zukan { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+#zukan .sp { grid-template-columns: 1fr; gap: 10px; padding: 10px 10px 12px; }
+#zukan .sp-art { width: 100%; }
+#zukan .sp-name b { font-size: 1.15rem; }
+#zukan .point { font-size: .92rem; line-height: 1.75; }
+
 @media (max-width: 520px) {
   .field { grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 7px; }
   .zukan-title { font-size: 1.4rem; }
   .plot { border-radius: 10px; border-width: 2px; }
   .chef.small { width: 60px; height: 60px; }
   .sp { grid-template-columns: 42% 1fr; gap: 10px; padding: 10px; }
+  #zukan { grid-template-columns: 1fr 1fr; gap: 10px; }
+  #zukan .sp { padding: 7px 7px 10px; border-width: 3px; box-shadow: 3px 3px 0 var(--ink); }
+  #zukan .sp-name { gap: 4px; }
+  #zukan .sp-name b { font-size: 1rem; width: 100%; order: -1; }
+  #zukan .sp-name .kind { font-size: .68rem; }
+  #zukan .point { font-size: .8rem; line-height: 1.65; }
+  #zukan .like { font-size: .75rem; }
   .stage .icon { font-size: 1.6rem; }
 }
 
