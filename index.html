@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>食べるな危険</title>
+  <meta name="description" content="仲間のハンターのために、野山で食べられるハーブ・山菜・きのこを収穫するゲーム。そっくりな毒草・毒きのこに気をつけろ！">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="食べるな危険｜その草、食べられる？">
+  <meta property="og:description" content="次々に生えてくるハーブと雑草・毒草。仲間のハンターのために食べられるものだけを収穫しよう！ハーブ編100種・きのこ編100種。">
+  <meta property="og:url" content="https://techgymjp.github.io/taverna/">
+  <meta property="og:image" content="https://techgymjp.github.io/taverna/img/ogp.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="leaves" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="sound-toggles">
+    <button type="button" class="toggle" id="tg-bgm" aria-pressed="true">♪ BGM</button>
+    <button type="button" class="toggle" id="tg-se" aria-pressed="true">🔔 効果音</button>
+    <button type="button" class="toggle" id="tg-voice" aria-pressed="true">🗣 声</button>
+  </div>
+
+  <main id="app">
+    <!-- タイトル -->
+    <section id="screen-title" class="screen active">
+      <div class="sign" aria-hidden="true"><span>狩猟小屋</span></div>
+      <h1 class="logo"><span>食</span><span>べ</span><span>る</span><span>な</span><span class="danger">危</span><span class="danger">険</span></h1>
+      <div class="chef-row">
+        <div class="chef" id="title-hunter"></div>
+        <p class="bubble">おう、新入り！仲間のハンターたちが<strong>腹ペコ</strong>だ。<br>野山で<strong>食べられるもの</strong>を採ってきてくれ。<br>ただし<strong>毒</strong>を持ってきたら承知しねえぞ！</p>
+      </div>
+      <div class="title-vs" id="title-vs"></div>
+      <p class="genre-title">ステージをえらぶ</p>
+      <div class="stages" id="stages" role="radiogroup" aria-label="ステージ"></div>
+      <ul class="rules">
+        <li>⏱ <strong>60秒</strong>で、どんどん生えてくる<strong>食べられるもの</strong>だけをタップして収穫</li>
+        <li>❤️ ライフは<strong>3つ</strong>。雑草や毒を採るとライフが減って、ハンターが怒る！</li>
+        <li>🎯 ノルマを達成して生きのこればクリア。ハーブ編をクリアすると<strong>きのこ編</strong>へ</li>
+      </ul>
+      <label class="name-field">ハンター名
+        <input type="text" id="player-name" maxlength="10" placeholder="名無しの新入り" autocomplete="nickname">
+      </label>
+      <div class="menu">
+        <button class="btn primary big" id="btn-start">出発する！</button>
+        <button class="btn" id="btn-ranking">🏆 ランキング</button>
+        <button class="btn" id="btn-zukan">📖 野草・きのこ図鑑</button>
+      </div>
+      <p class="best" id="best-score"></p>
+      <p class="caution">※ ゲームは見分けの入り口です。野生の植物・きのこは<strong>専門家でも間違える</strong>ことがあります。確実にわからないものは、採らない・食べない・人にあげない！</p>
+    </section>
+
+    <!-- プレイ -->
+    <section id="screen-play" class="screen">
+      <header class="hud">
+        <div class="status">
+          <span class="chip lives" id="hud-lives" aria-label="ライフ"></span>
+          <span class="chip score" id="hud-score">0点</span>
+          <span class="chip harvest" id="hud-harvest">収穫 0 / 20</span>
+          <span class="chip combo" id="hud-combo" hidden></span>
+        </div>
+        <div class="progress timer"><div class="progress-bar" id="hud-time"></div><span class="timer-text" id="hud-sec">60</span></div>
+      </header>
+      <div class="chef-row order">
+        <div class="chef small" id="play-hunter"></div>
+        <p class="bubble question" id="order" aria-live="polite"></p>
+      </div>
+      <div class="field-wrap">
+        <div class="field" id="field"></div>
+        <div class="stamp" id="stamp" hidden></div>
+        <div class="countdown" id="countdown" hidden></div>
+      </div>
+    </section>
+
+    <!-- 結果 -->
+    <section id="screen-result" class="screen">
+      <h2 class="result-title" id="r-title">本日の収穫</h2>
+      <p class="result-genre" id="r-stage"></p>
+      <p class="result-score"><span id="r-score">0</span><small>点</small></p>
+      <p class="result-time" id="r-detail"></p>
+      <p class="rank" id="r-rank"></p>
+      <p class="rank-in" id="r-rankin" hidden></p>
+      <p class="unlock" id="r-unlock" hidden>🍄 きのこ編が解放された！</p>
+      <div class="chef-row">
+        <div class="chef" id="result-hunter"></div>
+        <p class="bubble" id="r-msg"></p>
+      </div>
+      <div class="basket" id="r-basket"></div>
+      <div class="share">
+        <p class="share-title">結果をシェアする</p>
+        <p class="share-marks" id="share-marks"></p>
+        <div class="share-buttons">
+          <a class="share-btn x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 ポスト</a>
+          <a class="share-btn line" id="share-line" href="#" target="_blank" rel="noopener">LINE</a>
+          <a class="share-btn fb" id="share-fb" href="#" target="_blank" rel="noopener">Facebook</a>
+          <button type="button" class="share-btn more" id="share-native" hidden>📤 その他</button>
+          <button type="button" class="share-btn copy" id="share-copy">🔗 コピー</button>
+        </div>
+        <p class="share-toast" id="share-toast" role="status"></p>
+      </div>
+      <div class="review" id="review"></div>
+      <div class="menu">
+        <button class="btn primary big" id="btn-next-stage" hidden>きのこ編へ進む ▶</button>
+        <button class="btn primary big" id="btn-retry">もう一回！</button>
+        <button class="btn" id="btn-result-ranking">🏆 ランキング</button>
+        <button class="btn" id="btn-home">小屋へ戻る</button>
+      </div>
+    </section>
+
+    <!-- ランキング -->
+    <section id="screen-ranking" class="screen">
+      <h2 class="zukan-title">🏆 ランキング</h2>
+      <p class="ranking-note">この端末での記録です（ステージごとに上位10件）</p>
+      <div class="genres" id="ranking-tabs" role="tablist" aria-label="ステージ"></div>
+      <div class="ranking" id="ranking-list"></div>
+      <div class="menu">
+        <button class="btn" id="btn-ranking-back">小屋へ戻る</button>
+        <button class="btn danger" id="btn-ranking-clear">記録を消す</button>
+      </div>
+    </section>
+
+    <!-- 図鑑 -->
+    <section id="screen-zukan" class="screen">
+      <h2 class="zukan-title">📖 野草・きのこ図鑑 <small id="zukan-count"></small></h2>
+      <div class="genres" id="zukan-tabs" role="tablist" aria-label="ステージ"></div>
+      <div class="genres kinds" id="zukan-kinds" role="tablist" aria-label="種類"></div>
+      <div class="zukan" id="zukan"></div>
+      <div class="menu">
+        <button class="btn" id="btn-zukan-back">小屋へ戻る</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/ranking.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
