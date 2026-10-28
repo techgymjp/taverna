@@ -9,9 +9,13 @@ const Sound = (() => {
 
   const BGM_VOL = 0.16, SE_VOL = 0.5;
 
+  // iPhone のマナーモード中でも効果音・BGM を鳴らす（Safari 16.4 以降）
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* 対応していない端末はそのまま */ }
+
   function init() {
     if (ctx) {
-      if (ctx.state === 'suspended') ctx.resume();
+      // 'suspended'（自動再生の制限）や 'interrupted'（iPhone で音声読み上げや着信のあと）から戻す
+      if (ctx.state !== 'running') ctx.resume().catch(() => {});
       return true;
     }
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -26,8 +30,16 @@ const Sound = (() => {
     seGain = ctx.createGain();
     seGain.gain.value = SE_VOL;
     seGain.connect(master);
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return true;
   }
+
+  // 画面に触れるたびに、止まっている音を再開する（ブラウザは「操作のあと」でないと音を出せない）
+  ['pointerdown', 'touchend', 'click', 'keydown'].forEach((ev) => {
+    document.addEventListener(ev, () => {
+      if (settings.se || settings.bgm) init();
+    }, { capture: true, passive: true });
+  });
 
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* 保存できなくても動く */ }
