@@ -833,6 +833,11 @@ const Art = (() => {
 
   // 地面・木
   function substrate(sub) {
+    const body = substrateBody(sub);
+    // 背景（丸太・幹）。図鑑で拡大するときは、きのこ本体だけに合わせる
+    return body ? `<g class="sub">${body}</g>` : '';
+  }
+  function substrateBody(sub) {
     if (sub === 'log') {
       return `<path d="M -4 82 L 104 76 L 104 100 L -4 100 Z" fill="#8a6142" stroke="${OUT}" stroke-width="1.2"/>`
         + `<path d="M 4 88 L 40 86 M 50 92 L 96 88 M 20 95 L 70 93" stroke="#5e4029" stroke-width="1.2"/>`

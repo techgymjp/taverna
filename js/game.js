@@ -131,6 +131,29 @@
     }
   }
 
+  // ---------- イラストを枠いっぱいに ----------
+  // 絵の余白を切り詰めて、枠いっぱいに大きく見せる（根元・地面は下にそろえる）
+  function fitArt(root) {
+    requestAnimationFrame(() => {
+      root.querySelectorAll('svg').forEach((svg) => {
+        if (svg.dataset.fit) return;
+        // 背景（丸太・幹）はいったん隠して、本体だけの大きさをはかる
+        const subs = svg.querySelectorAll('.sub');
+        subs.forEach((g) => { g.style.display = 'none'; });
+        let bb;
+        try { bb = svg.getBBox(); } catch { bb = null; }
+        subs.forEach((g) => { g.style.display = ''; });
+        if (!bb || !bb.width || !bb.height) return;
+        const pad = 3;
+        const size = Math.max(bb.width, bb.height, 30) + pad * 2;
+        const x = bb.x + bb.width / 2 - size / 2;
+        const y = Math.min(bb.y - pad, bb.y + bb.height + pad - size);
+        svg.setAttribute('viewBox', `${x.toFixed(1)} ${y.toFixed(1)} ${size.toFixed(1)} ${size.toFixed(1)}`);
+        svg.dataset.fit = '1';
+      });
+    });
+  }
+
   // ---------- タイトル ----------
   function renderTitle() {
     // 食べられるものと、そっくりな毒のペアを並べて見せる
@@ -141,6 +164,7 @@
     $('title-hunter').innerHTML = hunterSvg('happy');
     renderStages();
     show('title');
+    fitArt($('title-vs'));
     Sound.startBgm('title');
   }
 
@@ -519,6 +543,8 @@
       : '';
     setupShare(rank, win);
     show('result');
+    fitArt($('r-basket'));
+    fitArt($('review'));
     setHunter('result-hunter', rank.mood);
 
     Sound.stopBgm();
@@ -658,6 +684,7 @@
     tabs('zukan-kinds', kinds, kind, (id) => { state.zukanKind = id; renderZukan(); });
     const list = pool.filter((s) => kind === 'all' || s.kind === kind).sort((a, b) => a.level - b.level);
     $('zukan').innerHTML = list.map(speciesCard).join('');
+    fitArt($('zukan'));
     $('zukan-count').textContent = `全${SPECIES.length}種`;
   }
 

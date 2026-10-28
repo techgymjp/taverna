@@ -865,7 +865,7 @@ body {
 
 /* ---------- 図鑑・おさらい ---------- */
 .kinds { margin: 10px auto 18px; }
-.sp { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: start; padding: 12px 14px; }
+.sp { display: grid; grid-template-columns: 220px 1fr; gap: 16px; align-items: start; padding: 12px 14px; }
 .sp-art { margin: 0; background: #f0e0bf; border: 3px solid var(--ink); border-radius: 14px; overflow: hidden; }
 .sp-art svg { display: block; width: 100%; height: auto; }
 .sp-name { margin: 0 0 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
@@ -897,7 +897,7 @@ body {
   .zukan-title { font-size: 1.4rem; }
   .plot { border-radius: 10px; border-width: 2px; }
   .chef.small { width: 60px; height: 60px; }
-  .sp { grid-template-columns: 88px 1fr; gap: 10px; padding: 10px; }
+  .sp { grid-template-columns: 42% 1fr; gap: 10px; padding: 10px; }
   .stage .icon { font-size: 1.6rem; }
 }
 
