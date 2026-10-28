@@ -237,7 +237,7 @@ body {
 }
 .title-vs figure {
   margin: 0;
-  background: #b98a55;
+  background: #f0e0bf;
   border: 4px solid var(--ink);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -246,10 +246,10 @@ body {
 .title-vs figure:first-child { transform: rotate(-2deg); }
 .title-vs figure:last-child { transform: rotate(2deg); }
 .title-vs svg { display: block; width: 100%; height: auto; }
-.title-vs figcaption { font-weight: 900; color: #fff; text-shadow: 1px 1px 0 var(--ink); font-size: .9rem; }
+.title-vs figcaption { font-weight: 900; color: var(--ink); font-size: .9rem; }
 .title-vs figcaption small { display: block; font-size: .72rem; margin-top: 2px; }
-.title-vs .ok small { color: #b8ffcc; }
-.title-vs .ng small { color: #ffc2c2; }
+.title-vs .ok small { color: var(--ok); }
+.title-vs .ng small { color: var(--ng); }
 .vs {
   display: grid;
   place-items: center;
@@ -692,7 +692,7 @@ body {
   padding: 10px;
   max-width: 560px;
   margin: 0 auto;
-  background: #8a5a32;
+  background: #c99e6c;
   border: 4px solid var(--ink);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -700,7 +700,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
 }
-.field-wrap[data-stage="kinoko"] .field { background: #4f3b2a; }
+.field-wrap[data-stage="kinoko"] .field { background: #8f7458; }
 .field.shake { animation: shake .4s; }
 
 .plot {
@@ -709,13 +709,13 @@ body {
   padding: 0;
   font: inherit;
   background:
-    radial-gradient(circle at 30% 35%, rgba(0, 0, 0, .12) 0 3px, transparent 4px),
-    radial-gradient(circle at 70% 65%, rgba(0, 0, 0, .12) 0 3px, transparent 4px),
+    radial-gradient(circle at 30% 35%, rgba(120, 80, 30, .14) 0 3px, transparent 4px),
+    radial-gradient(circle at 70% 65%, rgba(120, 80, 30, .14) 0 3px, transparent 4px),
     radial-gradient(circle at 60% 25%, rgba(255, 255, 255, .12) 0 2px, transparent 3px),
-    #b98a55;
+    #f0e0bf;
   border: 3px solid var(--ink);
   border-radius: 14px;
-  box-shadow: inset 0 -6px 0 rgba(0, 0, 0, .15);
+  box-shadow: inset 0 -6px 0 rgba(120, 80, 30, .15);
   cursor: pointer;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
@@ -724,10 +724,14 @@ body {
   background:
     radial-gradient(ellipse at 25% 80%, #8a6a2a 0 6px, transparent 7px),
     radial-gradient(ellipse at 75% 85%, #a0502a 0 5px, transparent 6px),
-    #6b5640;
+    #c9b292;
 }
 .plot .sprout { display: block; width: 100%; height: 100%; transform-origin: 50% 92%; }
 .plot svg { display: block; width: 100%; height: 100%; }
+/* 植物は大きく描く（上のマスにはみ出してよい。左右と下ははみ出さない） */
+.field-wrap[data-stage="herb"] .plot .sprout { clip-path: inset(-120% 0 0 0); }
+.field-wrap[data-stage="herb"] .plot svg { transform: scale(1.5); transform-origin: 50% 94%; }
+.plot.grow, .plot.wilt { z-index: 1; }
 .plot.grow .sprout { animation: sprout .35s cubic-bezier(.2, 1.6, .5, 1); }
 .plot.wilt .sprout { transition: transform .7s, opacity .7s, filter .7s; transform: scaleY(.8) rotate(6deg); opacity: .55; filter: grayscale(.6); }
 .plot.gone .sprout { transition: transform .35s, opacity .35s; transform: scaleY(0); opacity: 0; }
@@ -753,6 +757,23 @@ body {
 .float.ok { color: #fff; }
 .float.order { color: var(--yellow); font-size: 1.6rem; }
 .float.ng { color: #ff7a7a; font-size: 1rem; }
+/* 収穫したときの土ぼこり */
+.dust { position: absolute; left: 50%; bottom: 10%; z-index: 4; pointer-events: none; }
+.dust i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #d8b88a, #a87c4a);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.4);
+  animation: dust .8s ease-out forwards;
+}
+.field-wrap[data-stage="kinoko"] .dust i { background: radial-gradient(circle at 35% 35%, #a8906c, #6b5640); }
+@keyframes dust {
+  12% { opacity: .95; }
+  to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.8); opacity: 0; }
+}
 @keyframes floatup { from { transform: translate(-50%, 0) scale(.6); } 30% { transform: translate(-50%, -14px) scale(1.15); } to { transform: translate(-50%, -40px); opacity: 0; } }
 
 .stamp {
@@ -820,18 +841,18 @@ body {
 .basket figure {
   margin: 0;
   padding: 4px 4px 6px;
-  background: #b98a55;
+  background: #f0e0bf;
   border: 3px solid var(--ink);
   border-radius: 12px;
 }
 .basket svg { display: block; width: 100%; height: auto; }
-.basket figcaption { font-size: .72rem; font-weight: 900; color: #fff; text-shadow: 1px 1px 0 var(--ink); line-height: 1.3; }
-.basket figcaption b { display: block; font-size: .95rem; color: var(--yellow); }
+.basket figcaption { font-size: .72rem; font-weight: 900; color: var(--ink); line-height: 1.3; }
+.basket figcaption b { display: block; font-size: .95rem; color: var(--pink); }
 
 /* ---------- 図鑑・おさらい ---------- */
 .kinds { margin: 10px auto 18px; }
 .sp { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: start; padding: 12px 14px; }
-.sp-art { margin: 0; background: #b98a55; border: 3px solid var(--ink); border-radius: 14px; overflow: hidden; }
+.sp-art { margin: 0; background: #f0e0bf; border: 3px solid var(--ink); border-radius: 14px; overflow: hidden; }
 .sp-art svg { display: block; width: 100%; height: auto; }
 .sp-name { margin: 0 0 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .sp-name b { font-size: 1.2rem; font-weight: 900; }

@@ -238,6 +238,25 @@
     }, delay);
   }
 
+  // 引き抜いたときに根元から舞い上がる土ぼこり
+  function dust(cell) {
+    const box = document.createElement('span');
+    box.className = 'dust';
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement('i');
+      const a = (-160 + Math.random() * 140) * Math.PI / 180; // 上向きに広がる
+      const d = 26 + Math.random() * 44;
+      const size = 14 + Math.random() * 16;
+      p.style.width = p.style.height = `${size}px`;
+      p.style.setProperty('--dx', `${Math.cos(a) * d}px`);
+      p.style.setProperty('--dy', `${Math.sin(a) * d}px`);
+      p.style.animationDelay = `${Math.random() * 60}ms`;
+      box.appendChild(p);
+    }
+    cell.el.appendChild(box);
+    setTimeout(() => box.remove(), 800);
+  }
+
   // 浮かび上がる文字（+10 など）
   function floatText(cell, text, cls) {
     const s = document.createElement('span');
@@ -282,6 +301,7 @@
       state.basket[sp.id] = (state.basket[sp.id] || 0) + 1;
       state.marks.push(isOrder ? '⭐' : '🌿');
       floatText(cell, `+${pts}`, isOrder ? 'order' : 'ok');
+      dust(cell);
       clearCell(cell, 'picked');
       Sound.play('harvest', state.combo, isOrder);
       if (isOrder) {
