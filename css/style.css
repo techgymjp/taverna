@@ -18,6 +18,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; }
+html { overflow-x: hidden; } /* 大きな草がはみ出しても、ページの横幅を広げない */
 
 body {
   min-height: 100vh;
@@ -698,7 +699,7 @@ body {
 .order .bubble { min-height: 3.4em; font-size: clamp(.95rem, 4vw, 1.2rem); }
 .order .bubble small { display: block; font-size: .75rem; color: var(--muted); }
 
-.field-wrap { position: relative; }
+.field-wrap { position: relative; overflow-x: clip; } /* 草は上にははみ出してよいが、左右は畑の外に出さない */
 .field {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
