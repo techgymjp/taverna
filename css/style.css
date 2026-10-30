@@ -130,7 +130,7 @@ body {
 .sign {
   display: flex;
   justify-content: center;
-  margin: -14px auto 12px;
+  margin: -4px auto 12px;
 }
 .sign span {
   position: relative;
@@ -179,6 +179,11 @@ body {
   background: repeating-linear-gradient(135deg, var(--red) 0 10px, #ff6a5a 10px 20px);
 }
 @keyframes hop { 40% { translate: 0 -10px; } 60% { translate: 0 0; } }
+/* 英語のロゴは単語ごとのタイル */
+.logo.words { font-size: clamp(1.9rem, 9vw, 3.4rem); }
+.logo.words span { width: auto; padding: 0 .3em; }
+.toggle.lang { background: var(--paper); }
+html[lang="en"] .float.ng { font-size: .8rem; }
 @media (max-width: 520px) { .logo { gap: 5px; font-size: clamp(2rem, 11vw, 3rem); } .logo span { border-radius: 14px; } }
 
 /* ---------- ハンターと吹き出し ---------- */

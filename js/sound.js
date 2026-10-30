@@ -336,11 +336,13 @@ const Sound = (() => {
   // ---------- ハンターの声（ブラウザの音声合成） ----------
   const synth = window.speechSynthesis;
   let jaVoice = null;
+  const EN = typeof I18N !== 'undefined' && I18N.lang === 'en';
   function pickVoice() {
     if (!synth) return;
-    const voices = synth.getVoices().filter((v) => /^ja/i.test(v.lang));
+    const voices = synth.getVoices().filter((v) => (EN ? /^en/i : /^ja/i).test(v.lang));
     // 男性っぽい声があれば優先
-    jaVoice = voices.find((v) => /otoya|ichiro|keita|male|男性/i.test(v.name)) || voices[0] || null;
+    const male = EN ? /david|daniel|alex|fred|george|guy|male/i : /otoya|ichiro|keita|male|男性/i;
+    jaVoice = voices.find((v) => male.test(v.name)) || voices[0] || null;
   }
   if (synth) {
     pickVoice();
@@ -351,9 +353,9 @@ const Sound = (() => {
     if (!settings.voice || !synth) return;
     synth.cancel();
     const u = new SpeechSynthesisUtterance(text.replace(/[「」…]/g, ''));
-    u.lang = 'ja-JP';
+    u.lang = EN ? 'en-US' : 'ja-JP';
     if (jaVoice) u.voice = jaVoice;
-    u.rate = 1.2;
+    u.rate = EN ? 1.05 : 1.2;
     u.pitch = 0.6;
     u.volume = 1;
     synth.speak(u);
@@ -367,11 +369,11 @@ const Sound = (() => {
 
   // 音のテスト：ドミソを鳴らし、ブラウザの音の状態を返す
   async function test() {
-    if (!init()) return 'このブラウザは効果音（Web Audio）に対応していません';
+    if (!init()) return I18N.t('soundNoAudio');
     try { await ctx.resume(); } catch { /* 状態の表示で分かる */ }
     ['C5', 'E5', 'G5', 'C6'].forEach((n, i) => tone(seGain, freq(n), ctx.currentTime + 0.05 + i * 0.12, 0.3, { type: 'triangle', vol: 0.4 }));
-    const state = { running: '再生できる状態', suspended: 'ブラウザに止められている', interrupted: '他のアプリに止められている', closed: '終了している' }[ctx.state] || ctx.state;
-    return `音の状態：${state}（効果音 ${settings.se ? 'ON' : 'OFF'}・BGM ${settings.bgm ? 'ON' : 'OFF'}）`;
+    const state = I18N.t('soundStates')[ctx.state] || ctx.state;
+    return I18N.t('soundState', { s: state, se: settings.se ? 'ON' : 'OFF', bgm: settings.bgm ? 'ON' : 'OFF' });
   }
 
   return {

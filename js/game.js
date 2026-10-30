@@ -23,20 +23,15 @@
     rankingStage: 'herb', zukanStage: 'herb', zukanKind: 'all', lastRecord: null, raf: 0,
   };
 
-  // ---------- ハンターのセリフ（{n} に名前が入る） ----------
-  const ORDERS = [
-    '腹ペコだ！{n}を採ってきてくれ！',
-    '{n}が食いてえなあ。たのむぞ！',
-    '今夜の鍋に{n}を入れたい！',
-    'おい、{n}はあるか？見つけたら頼む！',
-    '{n}で一杯やりたいねえ！',
-  ];
-  const PRAISES = ['うまそうだ！', 'いいぞ、その調子！', 'でかした！', 'それそれ、それが食いたかった！'];
-  const ORDER_DONE = ['よし、{n}だ！ありがてえ！', 'これこれ！{n}だよ！'];
+  // ---------- ハンターのセリフ（{n} に名前が入る。文言は js/i18n.js） ----------
+  const T = I18N.t;
+  const ORDERS = T('orders');
+  const PRAISES = T('praises');
+  const ORDER_DONE = T('orderDone');
   // 間違えたときは、かならず「こら、それは○○だ！」と名前を言う
-  const ANGRY_WEED = ['ただの雑草じゃねえか！', 'そんなもん食えるか！', 'よく見て採れ！'];
-  const ANGRY_POISON = ['毒だぞ！食べるな危険！', 'みんなを殺す気か！', 'あぶねえ、そいつは毒だ！'];
-  const LEVEL_UP = { 2: 'だんだん紛らわしいのが生えてきたぞ。', 3: 'ここからは山のプロでも迷う難所だ！' };
+  const ANGRY_WEED = T('angryWeed');
+  const ANGRY_POISON = T('angryPoison');
+  const LEVEL_UP = T('levelUp');
 
   // ---------- ハンターのイラスト ----------
   function hunterSvg(mood = 'normal') {
@@ -54,7 +49,7 @@
       ? '<path d="M 38 50 L 54 57 M 82 50 L 66 57" stroke="#233050" stroke-width="5" stroke-linecap="round"/>'
       : '<path d="M 39 54 L 53 51 M 81 54 L 67 51" stroke="#233050" stroke-width="5" stroke-linecap="round"/>';
     const vein = angry ? '<path d="M 86 30 l 6 6 m 0 -6 l -6 6 M 96 22 l 6 6 m 0 -6 l -6 6" stroke="#e8202a" stroke-width="3.5" stroke-linecap="round"/><path d="M 14 44 q -6 -8 0 -14 M 106 44 q 6 -8 0 -14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".9"/>' : '';
-    return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ハンター">
+    return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${T('hunter')}">
       <path d="M 10 124 Q 14 96 60 94 Q 106 96 110 124 Z" fill="#5b7a3a" stroke="#233050" stroke-width="3"/>
       <path d="M 34 100 L 34 124 M 86 100 L 86 124" stroke="#f08a1e" stroke-width="8"/>
       <path d="M 50 95 L 60 108 L 70 95" fill="#c8402a" stroke="#233050" stroke-width="3" stroke-linejoin="round"/>
@@ -160,7 +155,7 @@
     const pairs = SPECIES.filter((s) => s.kind === 'poison' && Array.isArray(s.like));
     const bad = pick(pairs);
     const good = SPECIES_BY_ID[pick(bad.like)];
-    $('title-vs').innerHTML = `<figure class="ok">${Art.render(good)}<figcaption>${good.name}<small>食べられる</small></figcaption></figure><span class="vs">VS</span><figure class="ng">${Art.render(bad)}<figcaption>${bad.name}<small>毒</small></figcaption></figure>`;
+    $('title-vs').innerHTML = `<figure class="ok">${Art.render(good)}<figcaption>${good.name}<small>${T('edible')}</small></figcaption></figure><span class="vs">VS</span><figure class="ng">${Art.render(bad)}<figcaption>${bad.name}<small>${T('poisonous')}</small></figcaption></figure>`;
     $('title-hunter').innerHTML = hunterSvg('happy');
     renderStages();
     show('title');
@@ -181,7 +176,7 @@
       btn.setAttribute('aria-checked', String(st.id === state.stage));
       btn.disabled = !open;
       btn.innerHTML = `<span class="icon">${open ? st.icon : '🔒'}</span><b>${st.label}</b>`
-        + `<small>${open ? `${pool.length}種・ノルマ${st.quota}個` : `${stageOf(st.unlock).label}をクリアで解放`}</small>`
+        + `<small>${open ? T('stageInfo', { n: pool.length, q: st.quota }) : T('unlockHint', { s: stageOf(st.unlock).label })}</small>`
         + (cleared()[st.id] ? '<em class="cleared">CLEAR</em>' : '');
       btn.addEventListener('click', () => {
         state.stage = st.id;
@@ -192,7 +187,7 @@
       box.appendChild(btn);
     });
     const top = Ranking.list(state.stage)[0];
-    $('best-score').textContent = top ? `🏆 ${stageOf(state.stage).label}の1位：${top.score}点（${top.name}）` : '';
+    $('best-score').textContent = top ? T('bestLine', { s: stageOf(state.stage).label, score: top.score, name: top.name }) : '';
   }
 
   // ---------- 畑 ----------
@@ -205,7 +200,7 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'plot';
-      btn.setAttribute('aria-label', '空いている地面');
+      btn.setAttribute('aria-label', T('plotEmpty'));
       btn.addEventListener('pointerdown', (e) => { e.preventDefault(); tap(i); });
       btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(i); } });
       field.appendChild(btn);
@@ -249,13 +244,13 @@
     const onWood = sp.stage === 'kinoko' && (sp.look.on || ['shelf', 'bracket'].includes(sp.look.form));
     cell.el.innerHTML = `<span class="sprout"${onWood ? ' data-wood' : ''}>${Art.render(sp)}</span>`;
     cell.el.className = 'plot grow';
-    cell.el.setAttribute('aria-label', 'なにか生えている');
+    cell.el.setAttribute('aria-label', T('plotGrowing'));
   }
 
   function clearCell(cell, cls, delay = 450) {
     cell.item = null;
     cell.el.className = `plot ${cls}`;
-    cell.el.setAttribute('aria-label', '空いている地面');
+    cell.el.setAttribute('aria-label', T('plotEmpty'));
     const el = cell.el;
     setTimeout(() => {
       if (!state.cells.some((c) => c.el === el && c.item)) {
@@ -305,7 +300,7 @@
     const intro = lv > state.shownLevel ? LEVEL_UP[lv] || '' : '';
     state.shownLevel = lv;
     const line = intro + pick(ORDERS);
-    $('order').innerHTML = fill(line, { n: `<span class="target">${next.name}</span>` }) + '<small>（注文の品は3倍！）</small>';
+    $('order').innerHTML = fill(line, { n: `<span class="target">${next.name}</span>` }) + `<small>${T('orderNote')}</small>`;
     setHunter('play-hunter', 'normal');
     Sound.play('order');
     Sound.say(fill(line, { n: next.name }));
@@ -340,7 +335,7 @@
         state.order = null;
         state.nextOrder = state.elapsed + 1400;
       } else if (state.combo % 5 === 0) {
-        $('order').textContent = `${state.combo}連続！${pick(PRAISES)}`;
+        $('order').textContent = T('comboLine', { c: state.combo, p: pick(PRAISES) });
         setHunter('play-hunter', 'happy');
         state.nextOrder = Math.max(state.nextOrder, state.elapsed + 1400);
         state.order = null;
@@ -357,15 +352,15 @@
     state.marks.push(sp.kind === 'poison' ? '☠️' : '🌾');
     if (!state.mistakes.includes(sp)) state.mistakes.push(sp);
     const poison = sp.kind === 'poison';
-    floatText(cell, `${poison ? '☠' : '🌾'} ${sp.name}`, 'ng');
+    floatText(cell, T(poison ? 'floatPoison' : 'floatWeed', { w: sp.name }), 'ng');
     clearCell(cell, 'bad', 700);
-    const line = `こら、それは${sp.name}だ！${pick(poison ? ANGRY_POISON : ANGRY_WEED)}`;
+    const line = `${T('angry', { w: sp.name })} ${pick(poison ? ANGRY_POISON : ANGRY_WEED)}`;
     $('order').textContent = line;
     setHunter('play-hunter', 'angry');
     Sound.play(poison ? 'poison' : 'miss');
     Sound.say(line);
     const stamp = $('stamp');
-    stamp.textContent = poison ? '食べるな危険！' : 'それは雑草だ！';
+    stamp.textContent = T(poison ? 'stampPoison' : 'stampWeed');
     stamp.className = `stamp ${poison ? 'poison' : 'weed'}`;
     stamp.hidden = false;
     clearTimeout(mistake.timer);
@@ -386,13 +381,13 @@
   function updateHud() {
     const st = stageOf(state.stage);
     $('hud-lives').innerHTML = [...Array(LIVES)].map((_, i) => `<span class="${i < state.lives ? 'on' : 'off'}">❤</span>`).join('');
-    $('hud-score').textContent = `${state.score}点`;
+    $('hud-score').textContent = T('points', { n: state.score });
     const h = $('hud-harvest');
-    h.textContent = `収穫 ${state.harvested} / ${st.quota}`;
+    h.textContent = T('harvestChip', { n: state.harvested, q: st.quota });
     h.classList.toggle('done', state.harvested >= st.quota);
     const combo = $('hud-combo');
     combo.hidden = state.combo < 2;
-    combo.textContent = `🔥 ${state.combo}連続`;
+    combo.textContent = T('combo', { n: state.combo });
   }
 
   function updateTimer() {
@@ -454,7 +449,7 @@
     show('play');
     document.querySelector('.field-wrap').dataset.stage = state.stage;
     const st = stageOf(state.stage);
-    const intro = `${st.place}に着いたぞ！${st.desc}`;
+    const intro = T('arrive', { place: st.place, desc: st.desc });
     $('order').textContent = intro;
     setHunter('play-hunter', 'normal');
     // 出発のファンファーレを聞かせてから、ハンターのひとことと3・2・1
@@ -470,7 +465,7 @@
     if (!$('screen-play').classList.contains('active')) return;
     const el = $('countdown');
     el.hidden = false;
-    el.textContent = n || 'スタート！';
+    el.textContent = n || T('go');
     el.classList.remove('pop');
     void el.offsetWidth;
     el.classList.add('pop');
@@ -496,14 +491,14 @@
 
   // ---------- 結果 ----------
   function rankOf(win, harvested, quota) {
-    if (!win) {
-      return state.lives <= 0
-        ? { title: '🤢 腹をこわした新入り', msg: 'おいおい、毒や雑草ばっかりじゃねえか！図鑑でしっかり勉強してこい！', mood: 'angry' }
-        : { title: '🌱 見習いハンター', msg: `収穫が足りねえな。ノルマは${quota}個だ。もっと手早く見分けろ！`, mood: 'normal' };
-    }
-    if (harvested >= quota * 1.6) return { title: '👑 伝説の山の達人', msg: 'こいつはたまげた！今夜はごちそうだ。お前こそ山の達人だ！', mood: 'happy' };
-    if (harvested >= quota * 1.3) return { title: '🏹 一流ハンター', msg: 'いい目をしてるな！仲間たちも大喜びだ！', mood: 'happy' };
-    return { title: '🎒 一人前のハンター', msg: 'よくやった！これでみんな腹いっぱいだ。', mood: 'happy' };
+    const rank = (key, mood) => {
+      const [title, msg] = T(key);
+      return { title, msg: msg.replace('{q}', quota), mood };
+    };
+    if (!win) return state.lives <= 0 ? rank('rankSick', 'angry') : rank('rankApprentice', 'normal');
+    if (harvested >= quota * 1.6) return rank('rankLegend', 'happy');
+    if (harvested >= quota * 1.3) return rank('rankPro', 'happy');
+    return rank('rankFull', 'happy');
   }
 
   function finish() {
@@ -515,33 +510,33 @@
     const firstClear = win && !cleared()[st.id];
     if (win) markCleared(st.id);
 
-    $('r-title').textContent = win ? '🎉 ミッション成功！' : state.lives <= 0 ? '💀 ミッション失敗…' : '⌛ ノルマ未達成…';
+    $('r-title').textContent = T(win ? 'resultWin' : state.lives <= 0 ? 'resultDead' : 'resultShort');
     $('r-title').className = `result-title ${win ? 'win' : 'lose'}`;
     $('r-stage').textContent = `${st.icon} ${st.label}`;
     $('r-score').textContent = state.score;
-    $('r-detail').textContent = `収穫 ${state.harvested}個（ノルマ${st.quota}）・最大${state.maxCombo}連続・ミス${LIVES - state.lives}回`;
+    $('r-detail').textContent = T('detail', { n: state.harvested, q: st.quota, c: state.maxCombo, m: LIVES - state.lives });
     $('r-rank').textContent = rank.title;
     $('r-msg').textContent = rank.msg;
 
     const next = STAGES.find((s) => s.unlock === st.id);
     $('r-unlock').hidden = !(firstClear && next);
-    if (next) $('r-unlock').textContent = `${next.icon} ${next.label}が解放された！`;
+    if (next) $('r-unlock').textContent = T('unlocked', { icon: next.icon, s: next.label });
     $('btn-next-stage').hidden = !(win && next);
-    if (next) $('btn-next-stage').textContent = `${next.label}へ進む ▶`;
+    if (next) $('btn-next-stage').textContent = T('nextStage', { s: next.label });
 
-    const name = Ranking.getName() || Ranking.DEFAULT_NAME;
+    const name = Ranking.getName() || T('defaultName');
     const rec = Ranking.add(st.id, { name, score: state.score, harvest: state.harvested, win, title: rank.title });
     state.lastRecord = rec.id;
     $('r-rankin').hidden = !rec.rank;
-    $('r-rankin').textContent = rec.rank === 1 ? '🎉 ランキング 1位 更新！' : `ランキング ${rec.rank}位 にランクイン！`;
+    $('r-rankin').textContent = rec.rank === 1 ? T('rankFirst') : T('rankIn', { n: rec.rank });
 
     // 収穫したもの
     const got = Object.entries(state.basket).sort((a, b) => b[1] - a[1]);
     $('r-basket').innerHTML = got.length
-      ? `<h3>🧺 収穫したもの</h3><div class="basket-items">${got.map(([id, n]) => `<figure>${Art.render(SPECIES_BY_ID[id])}<figcaption>${SPECIES_BY_ID[id].name}<b>×${n}</b></figcaption></figure>`).join('')}</div>`
+      ? `<h3>${T('basketTitle')}</h3><div class="basket-items">${got.map(([id, n]) => `<figure>${Art.render(SPECIES_BY_ID[id])}<figcaption>${SPECIES_BY_ID[id].name}<b>×${n}</b></figcaption></figure>`).join('')}</div>`
       : '';
     $('review').innerHTML = state.mistakes.length
-      ? `<h3>まちがえて採ったものをおさらい</h3>${state.mistakes.map(speciesCard).join('')}`
+      ? `<h3>${T('reviewTitle')}</h3>${state.mistakes.map(speciesCard).join('')}`
       : '';
     setupShare(rank, win);
     show('result');
@@ -566,14 +561,14 @@
   // ---------- SNS シェア ----------
   // シェアするリンク先（ゲームの紹介記事）
   const SHARE_URL = 'https://techgym.jp/column/claude-code-game-taverna/';
-  const HASHTAG = '食べるな危険';
+  const HASHTAG = T('hashtag');
   let shareText = '';
 
   function setupShare(rank, win) {
     const st = stageOf(state.stage);
     const marks = state.marks.slice(0, 40).join('');
     $('share-marks').textContent = marks;
-    shareText = `食べるな危険【${st.label}】で ${state.score}点！収穫${state.harvested}個${win ? '（ミッション成功）' : ''}\n称号：${rank.title}`;
+    shareText = T('shareText', { s: st.label, score: state.score, n: state.harvested, win: win ? T('shareWin') : '', t: rank.title });
     const enc = encodeURIComponent;
     $('share-x').href = `https://twitter.com/intent/tweet?text=${enc(shareText)}&url=${enc(SHARE_URL)}&hashtags=${enc(HASHTAG)}`;
     $('share-line').href = `https://line.me/R/msg/text/?${enc(`${shareText}\n${SHARE_URL}`)}`;
@@ -602,12 +597,12 @@
       document.execCommand('copy');
       ta.remove();
     }
-    toast('コピーしました！');
+    toast(T('copied'));
   }
 
   async function nativeShare() {
     try {
-      await navigator.share({ title: '食べるな危険', text: `${shareText}\n#${HASHTAG}`, url: SHARE_URL });
+      await navigator.share({ title: T('pageTitle'), text: `${shareText}\n#${HASHTAG}`, url: SHARE_URL });
     } catch { /* キャンセルされたときは何もしない */ }
   }
 
@@ -644,10 +639,10 @@
           <li class="${r.id === state.lastRecord ? 'latest' : ''}">
             <span class="pos">${MEDALS[i] || `${i + 1}`}</span>
             <span class="who">${escapeHtml(r.name)}<small>${escapeHtml(r.title)}</small></span>
-            <span class="pts">${r.score}<small>点</small></span>
-            <span class="time">収穫${r.harvest}${r.win ? ' ✅' : ''}<small>${Ranking.formatDate(r.date)}</small></span>
+            <span class="pts">${r.score}<small>${T('pointsUnit')}</small></span>
+            <span class="time">${T('harvestShort', { n: r.harvest })}${r.win ? ' ✅' : ''}<small>${Ranking.formatDate(r.date)}</small></span>
           </li>`).join('')}</ol>`
-      : '<p class="empty">まだ記録がないよ。山へ出発しよう！</p>';
+      : `<p class="empty">${T('emptyRanking')}</p>`;
     $('btn-ranking-clear').hidden = !rows.length;
   }
 
@@ -666,21 +661,21 @@
       <div class="sp-body">
         <p class="sp-name"><span class="kind">${k.badge} ${k.label}</span><b>${s.name}</b><span class="lv" data-level="${s.level}">${LEVELS[s.level].stars}</span></p>
         <p class="point">${s.point}</p>
-        ${like ? `<p class="like">${s.kind === 'good' ? '⚠️ まちがえやすい' : '🌀 そっくりさん'}：<b>${escapeHtml(like)}</b></p>` : ''}
+        ${like ? `<p class="like">${T(s.kind === 'good' ? 'likeGood' : 'likeBad')}${I18N.lang === 'en' ? ': ' : '：'}<b>${escapeHtml(like)}</b></p>` : ''}
       </div>
     </article>`;
   }
 
   const KIND_TABS = [
-    { id: 'all', icon: '🗂️', label: 'すべて' },
-    { id: 'good', icon: '🍽️', label: '食べられる' },
-    { id: 'weed', icon: '🌾', label: '雑草' },
-    { id: 'poison', icon: '☠️', label: '毒' },
+    { id: 'all', icon: '🗂️', label: T('kindAll') },
+    { id: 'good', icon: '🍽️', label: KINDS.good.label },
+    { id: 'weed', icon: '🌾', label: KINDS.weed.label },
+    { id: 'poison', icon: '☠️', label: KINDS.poison.label },
   ];
 
   function renderZukan() {
     const stage = state.zukanStage, kind = state.zukanKind;
-    tabs('zukan-tabs', STAGES.map((s) => ({ ...s, count: `${poolOf(s.id).length}種` })), stage, (id) => { state.zukanStage = id; state.zukanKind = 'all'; renderZukan(); });
+    tabs('zukan-tabs', STAGES.map((s) => ({ ...s, count: T('speciesCount', { n: poolOf(s.id).length }) })), stage, (id) => { state.zukanStage = id; state.zukanKind = 'all'; renderZukan(); });
     const pool = poolOf(stage);
     const kinds = KIND_TABS.filter((k) => k.id === 'all' || pool.some((s) => s.kind === k.id))
       .map((k) => ({ ...k, count: k.id === 'all' ? pool.length : pool.filter((s) => s.kind === k.id).length }));
@@ -688,7 +683,7 @@
     const list = pool.filter((s) => kind === 'all' || s.kind === kind).sort((a, b) => a.level - b.level);
     $('zukan').innerHTML = list.map(speciesCard).join('');
     fitArt($('zukan'));
-    $('zukan-count').textContent = `全${SPECIES.length}種`;
+    $('zukan-count').textContent = T('speciesTotal', { n: SPECIES.length });
   }
 
   function showZukan() {
@@ -735,7 +730,7 @@
   $('btn-ranking-back').addEventListener('click', home);
   $('btn-ranking-clear').addEventListener('click', () => {
     const st = stageOf(state.rankingStage);
-    if (!confirm(`「${st.label}」のランキングを消しますか？`)) return;
+    if (!confirm(T('clearConfirm', { s: st.label }))) return;
     Ranking.clear(state.rankingStage);
     renderRanking();
   });
@@ -745,8 +740,15 @@
   $('btn-zukan-back').addEventListener('click', home);
   $('btn-sound-test').addEventListener('click', async () => {
     $('sound-test-result').textContent = await Sound.test();
-    Sound.say('音のテストだ。聞こえるか？');
+    Sound.say(T('soundTestSay'));
   });
 
+  // ---------- 言語の切り替え ----------
+  $('tg-lang').addEventListener('click', () => {
+    Sound.play('tap');
+    I18N.setLang(I18N.lang === 'en' ? 'ja' : 'en');
+  });
+
+  I18N.apply();
   renderTitle();
 })();
