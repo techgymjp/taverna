@@ -1,0 +1,8 @@
+{
+  "appId": "jp.techgym.taverna",
+  "appName": "食べるな危険",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#a8e07a"
+  }
+}

@@ -41,11 +41,49 @@
 - `js/ranking.js` … ランキングの保存と並べ替え
 - `js/game.js` … ゲーム進行・ハンターのセリフ
 - `img/ogp.png` … SNS でリンクを貼ったときに表示される画像
+- `js/ads.js` … 広告（Android アプリのときだけ動く。Web 版では何もしない）
+- `js/ads-config.js` / `js/build-info.js` … 広告のモードとバージョン（アプリのビルド時に書き換える）
+- `android/` … Android アプリのプロジェクト（Capacitor）
+- `scripts/build-web.js` … アプリに入れるファイルを `www/` にコピーする
+- `assets/` … アプリのアイコンと起動画面の元画像
 
 ## 種の追加方法
 
 `js/data.js` に `herb()`（食べられる草）・`weed()`（雑草）・`poisonPlant()`（毒草）・`eat()`（食用きのこ）・`dokuKinoko()`（毒きのこ）の1行を追加します。
 `look` に葉の形・つき方・花・かさの形・ひだの色・つば・つぼなどを書くと、`js/art.js` がイラストを組み立てます。
+
+## Android アプリ
+
+[Capacitor](https://capacitorjs.com/) でゲームのファイルをアプリに同梱し、Android アプリにしています（オフラインで遊べます）。
+構成は techgymjp/jet-fighter の `docs/ANDROID_PORTING.md`、techgymjp/jackal と同じです。
+
+- パッケージ名: `jp.techgym.taverna`（縦画面固定・全画面・プレイ中は画面を消さない）
+- アプリ名はホーム画面で「食べるな危険」（英語の端末では Don't Eat It!）
+- 戻るボタン: プレイ中は一時停止（一時停止中なら再開）、タイトル・結果画面ではアプリを閉じる。別のアプリに切り替えると一時停止して音を止める
+- シェアは Android の共有メニュー（結果画面の「📤 その他」）
+- 広告（AdMob）
+  - バナー: タイトル画面・一時停止画面・結果画面の下中央（プレイ中は畑と重なるので出さない）
+  - 全画面広告: 「出発する」「もう一回」「次のステージへ」「小屋へ戻る（結果・一時停止から）」「一時停止からの再開」のたびに出す
+  - リワード: ライフがなくなったときの「CONTINUE?」で、広告を最後まで見るとライフ1つで続きから（1ゲーム1回。結果画面とシェア文に「コンティニュー1回」と出る）
+  - 起動時に Google の同意確認（EU など）。必要な地域ではタイトル画面に「広告の設定」が出る
+  - 動作確認用 APK はテスト広告、Google Play 用の AAB だけ本番広告（`ADMOB_MODE=production`）
+- タイトル画面の左上にバージョン（`v1.0.0 (build 12)` など）、下にプライバシーポリシーへのリンク
+
+GitHub Actions（`.github/workflows/android.yml`）が push のたびに次を行います。
+
+1. `npm ci` → `npm run build`（`www/` にゲームをコピー）→ `npx cap sync android` → デバッグ APK をビルド
+2. 既定ブランチなら、Release `android-latest` の `taverna.apk` を差し替え（動作確認用・テスト広告）
+   - リリース画面: https://github.com/techgymjp/taverna/releases/tag/android-latest
+   - APK 直接: https://github.com/techgymjp/taverna/releases/latest/download/taverna.apk
+3. GitHub Secrets に署名鍵（`ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD`）があれば、本番広告で署名付き AAB を作り Artifact に上げる
+
+手元で試すとき: `npm install` → `npm run android:sync` → `npm run android:open`（Android Studio が必要）。
+アイコンと起動画面は `assets/` の元画像から `npx @capacitor/assets generate --android` で生成しています。
+
+## ライセンス
+
+著作権はテックジム株式会社に帰属します（All rights reserved）。許可なく複製・改変・再配布すること、Web サイトやアプリとして公開・販売すること、名前・ロゴ・アイコン・画像を使うことを禁止します。
+テックジムの受講生が学習目的で複製・改変することは許可します（アプリストアでの公開・広告の掲載・販売などの商用利用は禁止）。詳しくは `LICENSE` をご覧ください。
 
 ## 公開（GitHub Pages）
 

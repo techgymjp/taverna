@@ -20,6 +20,7 @@
     elapsed: 0, last: 0, nextSpawn: 0, nextOrder: 0,
     score: 0, lives: LIVES, combo: 0, maxCombo: 0, harvested: 0,
     cells: [], order: null, basket: {}, mistakes: [], marks: [],
+    screen: 'title', halt: false, continues: 0,
     rankingStage: 'herb', zukanStage: 'herb', zukanKind: 'all', lastRecord: null, raf: 0,
   };
 
@@ -77,10 +78,22 @@
     el.classList.add('talk');
   }
 
+  // ---------- Android アプリ（Capacitor）----------
+  // Web 版では Capacitor がないので、アプリ用の処理は何もしない
+  const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  const plugin = (name) => (NATIVE && window.Capacitor.Plugins ? window.Capacitor.Plugins[name] : null);
+
   // ---------- 画面切り替え ----------
   function show(name) {
+    state.screen = name;
     document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === `screen-${name}`));
     window.scrollTo(0, 0);
+    updateBanner();
+  }
+
+  // バナー広告：タイトル画面・ポーズ画面・結果画面だけ（プレイ中は畑と重なるので出さない）
+  function updateBanner() {
+    Ads.setBanner(state.screen === 'title' || state.screen === 'result' || (state.screen === 'play' && !$('pause').hidden));
   }
 
   // ---------- 保存 ----------
@@ -308,7 +321,7 @@
 
   // ---------- タップ ----------
   function tap(i) {
-    if (!state.running || state.paused) return;
+    if (!state.running || state.paused || state.halt) return;
     const cell = state.cells[i];
     const item = cell.item;
     if (!item) return;
@@ -371,11 +384,78 @@
     // 怒ったあと、少しして次の注文へ
     state.order = null;
     state.nextOrder = state.elapsed + 1800;
-    if (state.lives <= 0) {
+    if (state.lives <= 0) outOfLives();
+  }
+
+  // ---------- コンティニュー（アプリのみ：リワード広告を最後まで見るとライフ+1。1ゲーム1回） ----------
+  // 怒られるところを見届けられるよう少し待ってから出し、数秒で自動的にゲームオーバーへ進める
+  const CONTINUE_DELAY = 2500;
+  const CONTINUE_WAIT = 8;
+  const cont = { timer: 0, tick: 0, left: 0, busy: false };
+
+  function outOfLives() {
+    if (Ads.canReward && !state.continues) {
+      state.halt = true; // 時間を止めて待つ
+      cont.timer = setTimeout(showContinue, CONTINUE_DELAY);
+    } else {
       state.running = false;
       setTimeout(finish, 900);
     }
   }
+  function showContinue() {
+    if (!state.halt || state.screen !== 'play') return;
+    Object.assign(cont, { left: CONTINUE_WAIT, busy: false });
+    $('continue-note').innerHTML = T('continueNote');
+    $('btn-continue-watch').disabled = false;
+    $('btn-continue-watch').textContent = T('continueWatch');
+    $('btn-continue-skip').textContent = T('continueSkip', { s: cont.left });
+    $('continue').hidden = false;
+    clearInterval(cont.tick);
+    cont.tick = setInterval(() => {
+      if (cont.busy) return;
+      cont.left--;
+      $('btn-continue-skip').textContent = T('continueSkip', { s: Math.max(0, cont.left) });
+      if (cont.left <= 0) giveUp();
+    }, 1000);
+  }
+  function closeContinue() {
+    clearTimeout(cont.timer);
+    clearInterval(cont.tick);
+    $('continue').hidden = true;
+  }
+  function giveUp() {
+    if ($('continue').hidden && !state.halt) return;
+    closeContinue();
+    state.halt = false;
+    state.running = false;
+    finish();
+  }
+  $('btn-continue-skip').addEventListener('click', () => { Sound.play('tap'); giveUp(); });
+  $('btn-continue-watch').addEventListener('click', async () => {
+    if (cont.busy) return;
+    cont.busy = true;
+    $('btn-continue-watch').disabled = true;
+    $('btn-continue-watch').textContent = T('continueLoading');
+    const result = await Ads.showRewarded();
+    if (result === 'unavailable') {
+      $('continue-note').textContent = T('continueFail');
+      setTimeout(giveUp, 1500);
+      return;
+    }
+    if (result !== 'rewarded') { giveUp(); return; }
+    // 最後まで見たら、ライフ1つで続きから
+    closeContinue();
+    state.continues++;
+    state.lives = 1;
+    state.halt = false;
+    state.last = performance.now();
+    updateHud();
+    const line = T('continueGo');
+    $('order').textContent = line;
+    setHunter('play-hunter', 'happy');
+    Sound.say(line);
+    Sound.startBgm('play');
+  });
 
   // ---------- HUD ----------
   function updateHud() {
@@ -407,7 +487,7 @@
     if (!state.running) return;
     const dt = Math.min(100, now - state.last);
     state.last = now;
-    if (!state.paused) {
+    if (!state.paused && !state.halt) {
       state.elapsed += dt;
       const t = state.elapsed / TIME;
       if (state.elapsed >= state.nextSpawn) {
@@ -438,8 +518,10 @@
     if (!isUnlocked(state.stage)) state.stage = 'herb';
     Sound.stopBgm();
     Sound.play('depart');
+    closeContinue();
+    $('pause').hidden = true;
     Object.assign(state, {
-      running: false, paused: false, elapsed: 0, nextSpawn: 0, nextOrder: 0, shownLevel: 1,
+      running: false, paused: false, halt: false, continues: 0, elapsed: 0, nextSpawn: 0, nextOrder: 0, shownLevel: 1,
       score: 0, lives: LIVES, combo: 0, maxCombo: 0, harvested: 0, order: null, basket: {}, mistakes: [], marks: [],
     });
     cancelAnimationFrame(state.raf);
@@ -483,10 +565,32 @@
     }
   }
 
-  // タブを切り替えたら一時停止
+  // ---------- 一時停止 ----------
+  function openPause() {
+    if (!state.running || state.halt || !$('pause').hidden) return;
+    state.paused = true;
+    $('pause').hidden = false;
+    Sound.stopBgm();
+    updateBanner();
+  }
+  function closePause() {
+    $('pause').hidden = true;
+    state.paused = false;
+    state.last = performance.now();
+    if (state.running) Sound.startBgm('play');
+    updateBanner();
+  }
+  $('btn-pause').addEventListener('click', () => { Sound.play('tap'); openPause(); });
+
+  // 別のアプリやタブに切り替えたら一時停止して音を止める（広告の表示中は広告側が音を止めている）
   document.addEventListener('visibilitychange', () => {
-    state.paused = document.hidden;
-    if (!document.hidden) state.last = performance.now();
+    if (document.hidden) {
+      if (!Ads.showing) openPause();
+      Sound.suspend();
+    } else {
+      state.last = performance.now();
+      if (!Ads.showing) Sound.resume();
+    }
   });
 
   // ---------- 結果 ----------
@@ -503,6 +607,9 @@
 
   function finish() {
     state.running = false;
+    state.halt = false;
+    closeContinue();
+    $('pause').hidden = true;
     cancelAnimationFrame(state.raf);
     const st = stageOf(state.stage);
     const win = state.lives > 0 && state.harvested >= st.quota;
@@ -514,7 +621,8 @@
     $('r-title').className = `result-title ${win ? 'win' : 'lose'}`;
     $('r-stage').textContent = `${st.icon} ${st.label}`;
     $('r-score').textContent = state.score;
-    $('r-detail').textContent = T('detail', { n: state.harvested, q: st.quota, c: state.maxCombo, m: LIVES - state.lives });
+    $('r-detail').textContent = T('detail', { n: state.harvested, q: st.quota, c: state.maxCombo, m: LIVES - state.lives + state.continues })
+      + (state.continues ? T('continuedDetail', { n: state.continues }) : '');
     $('r-rank').textContent = rank.title;
     $('r-msg').textContent = rank.msg;
 
@@ -568,12 +676,13 @@
     const st = stageOf(state.stage);
     const marks = state.marks.slice(0, 40).join('');
     $('share-marks').textContent = marks;
-    shareText = T('shareText', { s: st.label, score: state.score, n: state.harvested, win: win ? T('shareWin') : '', t: rank.title });
+    const extra = (win ? T('shareWin') : '') + (state.continues ? T('shareContinued', { n: state.continues }) : '');
+    shareText = T('shareText', { s: st.label, score: state.score, n: state.harvested, win: extra, t: rank.title });
     const enc = encodeURIComponent;
     $('share-x').href = `https://twitter.com/intent/tweet?text=${enc(shareText)}&url=${enc(SHARE_URL)}&hashtags=${enc(HASHTAG)}`;
     $('share-line').href = `https://line.me/R/msg/text/?${enc(`${shareText}\n${SHARE_URL}`)}`;
     $('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${enc(SHARE_URL)}`;
-    $('share-native').hidden = !navigator.share;
+    $('share-native').hidden = !(navigator.share || plugin('Share'));
     $('share-toast').textContent = '';
   }
 
@@ -601,6 +710,12 @@
   }
 
   async function nativeShare() {
+    // アプリでは Android の共有メニューを出す
+    const share = plugin('Share');
+    if (share) {
+      try { await share.share({ title: T('pageTitle'), text: `${shareText}\n#${HASHTAG}`, url: SHARE_URL, dialogTitle: T('shareDialog') }); } catch { /* キャンセル */ }
+      return;
+    }
     try {
       await navigator.share({ title: T('pageTitle'), text: `${shareText}\n#${HASHTAG}`, url: SHARE_URL });
     } catch { /* キャンセルされたときは何もしない */ }
@@ -710,20 +825,57 @@
   // ---------- イベント ----------
   function home() {
     state.running = false;
+    state.halt = false;
+    state.paused = false;
+    closeContinue();
+    $('pause').hidden = true;
     cancelAnimationFrame(state.raf);
     Sound.play('tap');
     renderTitle();
   }
-  $('btn-start').addEventListener('click', start);
-  $('btn-retry').addEventListener('click', start);
-  $('btn-next-stage').addEventListener('click', () => {
+
+  // 全画面広告（アプリのみ）：「出発」「もう一回」「次のステージへ」「小屋へ戻る（結果・ポーズから）」「ポーズからの再開」のたびに出す
+  let adBusy = false;
+  async function withInterstitial(next) {
+    if (adBusy) return;
+    if (Ads.available) {
+      adBusy = true;
+      await Ads.showInterstitial(3000);
+      adBusy = false;
+    }
+    next();
+  }
+  $('btn-start').addEventListener('click', () => withInterstitial(start));
+  $('btn-retry').addEventListener('click', () => withInterstitial(start));
+  $('btn-next-stage').addEventListener('click', () => withInterstitial(() => {
     const next = STAGES.find((s) => s.unlock === state.stage);
     if (!next) return;
     state.stage = next.id;
     try { localStorage.setItem(STAGE_KEY, next.id); } catch { /* 保存できなくても遊べる */ }
     start();
-  });
-  $('btn-home').addEventListener('click', home);
+  }));
+  $('btn-home').addEventListener('click', () => withInterstitial(home));
+  $('btn-resume').addEventListener('click', () => { Sound.play('tap'); withInterstitial(closePause); });
+  $('btn-pause-home').addEventListener('click', () => withInterstitial(home));
+
+  // Android の戻るボタン：プレイ中は一時停止（一時停止中なら再開）、タイトル・結果画面ではアプリを閉じる
+  if (plugin('App')) {
+    plugin('App').addListener('backButton', () => {
+      if (adBusy || Ads.showing) return;
+      if (state.screen === 'title' || state.screen === 'result') plugin('App').exitApp();
+      else if (state.screen === 'zukan' || state.screen === 'ranking') home();
+      else if (state.screen === 'play' && !state.halt) {
+        if (!$('pause').hidden) withInterstitial(closePause);
+        else openPause();
+      }
+    });
+  }
+
+  // タイトル画面の下に、プライバシーポリシーと（EU など必要な地域では）広告の設定を出す。アプリではバージョンも出す
+  $('privacy-link').href = T('privacyUrl');
+  if (window.APP_VERSION && window.APP_VERSION !== 'dev') document.querySelector('.version').textContent = window.APP_VERSION;
+  Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('ad-privacy').hidden = false; });
+  $('ad-privacy-link').addEventListener('click', (e) => { e.preventDefault(); Ads.showPrivacyOptions(); });
   $('btn-zukan').addEventListener('click', showZukan);
   $('btn-ranking').addEventListener('click', () => showRanking(state.stage));
   $('btn-result-ranking').addEventListener('click', () => showRanking(state.stage));

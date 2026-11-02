@@ -376,7 +376,17 @@ const Sound = (() => {
     return I18N.t('soundState', { s: state, se: settings.se ? 'ON' : 'OFF', bgm: settings.bgm ? 'ON' : 'OFF' });
   }
 
+  // 広告の表示中・別アプリに切り替えたときは音を止める（js/ads.js から呼ぶ）
+  function suspend() {
+    if (ctx && ctx.state === 'running') ctx.suspend().catch(() => {});
+    if (synth) synth.cancel();
+  }
+  function resume() {
+    if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+  }
+
   return {
+    suspend, resume,
     play, test, startBgm, stopBgm, duck, setBgm, setSe, say, setVoice,
     get voice() { return settings.voice; },
     get bgm() { return settings.bgm; },
