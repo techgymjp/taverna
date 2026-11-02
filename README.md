@@ -73,9 +73,11 @@ GitHub Actions（`.github/workflows/android.yml`）が push のたびに次を�
 
 1. `npm ci` → `npm run build`（`www/` にゲームをコピー）→ `npx cap sync android` → デバッグ APK をビルド
 2. 既定ブランチなら、Release `android-latest` の `taverna.apk` を差し替え（動作確認用・テスト広告）
-   - リリース画面: https://github.com/techgymjp/taverna/releases/tag/android-latest
+   - リリース画面: https://github.com/techgymjp/taverna/releases/tag/android-latest（QR コード: `docs/apk-qr.png`）
    - APK 直接: https://github.com/techgymjp/taverna/releases/latest/download/taverna.apk
 3. GitHub Secrets に署名鍵（`ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD`）があれば、本番広告で署名付き AAB を作り Artifact に上げる
+
+![動作確認用 APK のリリース画面の QR コード](docs/apk-qr.png)
 
 手元で試すとき: `npm install` → `npm run android:sync` → `npm run android:open`（Android Studio が必要）。
 アイコンと起動画面は `assets/` の元画像から `npx @capacitor/assets generate --android` で生成しています。
