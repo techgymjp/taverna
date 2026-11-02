@@ -46,6 +46,7 @@
 - `android/` … Android アプリのプロジェクト（Capacitor）
 - `scripts/build-web.js` … アプリに入れるファイルを `www/` にコピーする
 - `assets/` … アプリのアイコンと起動画面の元画像
+- `docs/store/` … Google Play 用のスクリーンショット・フィーチャーグラフィック・アイコンと、紹介文の下書き（`listing.md`、英語は `listing-en.txt`）
 
 ## 種の追加方法
 
