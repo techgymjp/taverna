@@ -44,6 +44,7 @@
 - `js/ads.js` … 広告（Android アプリのときだけ動く。Web 版では何もしない）
 - `js/ads-config.js` / `js/build-info.js` … 広告のモードとバージョン（アプリのビルド時に書き換える）
 - `android/` … Android アプリのプロジェクト（Capacitor）
+- `ios/` … iOS アプリのプロジェクト（Capacitor）
 - `scripts/build-web.js` … アプリに入れるファイルを `www/` にコピーする
 - `assets/` … アプリのアイコンと起動画面の元画像
 - `docs/store/` … Google Play 用のスクリーンショット・フィーチャーグラフィック・アイコンと、紹介文の下書き（`listing.md`、英語は `listing-en.txt`）
@@ -82,6 +83,18 @@ GitHub Actions（`.github/workflows/android.yml`）が push のたびに次を�
 
 手元で試すとき: `npm install` → `npm run android:sync` → `npm run android:open`（Android Studio が必要）。
 アイコンと起動画面は `assets/` の元画像から `npx @capacitor/assets generate --android` で生成しています。
+
+## iOS アプリ
+
+Android 版と同じ Capacitor のプロジェクトに `ios/` を足して作っています。構成は techgymjp/jet-fighter（JET STRIKE）の `docs/ANDROID_PORTING.md` の 7 章と同じです。Mac での作業手順は `docs/IOS_BUILD.md` にあります。
+
+- Bundle ID: `jp.techgym.taverna`（Android と同じ）、iPhone 専用・縦画面固定・全画面・プレイ中は画面を消さない
+- アプリ名はホーム画面で「食べるな危険」（英語の端末では Don't Eat It!）
+- 広告は Android と同じルール。起動時に App Tracking Transparency の確認を出す
+- AdMob の iOS 用の ID は `ios/App/App/Info.plist`（アプリ ID）と `js/ads.js` の `UNITS.ios.production`（広告ユニット）
+- iPhone のノッチ・ホームバーに重ならないよう、画面の上下を `env(safe-area-inset-*)` であける
+- GitHub Actions: `.github/workflows/ios.yml` で push のたびに Xcode でビルドできるかを確認（署名なし）、`.github/workflows/ios-release.yml` で本番広告の設定でビルドして TestFlight にアップロード（Secrets があるとき。ビルド番号は実行回数 + 100）
+- App Store 用の画像と掲載情報は `docs/store/ios/`（スクリーンショットは縦向き 1206 × 2622）
 
 ## ライセンス
 

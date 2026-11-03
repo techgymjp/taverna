@@ -40,5 +40,5 @@ Third-party software
 This game does not bundle third-party libraries. The font "M PLUS Rounded 1c" is loaded from
 Google Fonts (SIL Open Font License 1.1).
 
-The Android app also uses Capacitor and @capacitor-community/admob (MIT License), installed
+The Android and iOS apps also use Capacitor and @capacitor-community/admob (MIT License), installed
 from npm at build time.

@@ -66,6 +66,9 @@ body {
   max-width: 880px;
   margin: 0 auto;
   padding: 56px 16px 32px;
+  /* iPhone のノッチ・ホームバーの部分を避ける（ふつうの画面では 0） */
+  padding-top: calc(56px + env(safe-area-inset-top));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
 
 .screen { display: none; }
@@ -75,8 +78,8 @@ body {
 /* ---------- 音の切り替え ---------- */
 .sound-toggles {
   position: fixed;
-  top: 10px;
-  right: 10px;
+  top: calc(10px + env(safe-area-inset-top));
+  right: calc(10px + env(safe-area-inset-right));
   z-index: 10;
   display: flex;
   gap: 6px;
@@ -406,7 +409,7 @@ html[lang="en"] .float.ng { font-size: .8rem; }
 }
 
 @media (max-width: 520px) {
-  #app { padding: 56px 12px 24px; }
+  #app { padding: 56px 12px 24px; padding-top: calc(56px + env(safe-area-inset-top)); padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
   .chef { width: 72px; height: 72px; }
   .bubble { font-size: 1rem; padding: 10px 14px; }
   .toggle { font-size: .72rem; padding: 4px 8px; }
@@ -673,8 +676,8 @@ html[lang="en"] .float.ng { font-size: .8rem; }
 .caution strong { color: var(--ng); }
 .version {
   position: fixed;
-  top: 12px;
-  left: 10px;
+  top: calc(12px + env(safe-area-inset-top));
+  left: calc(10px + env(safe-area-inset-left));
   z-index: 10;
   margin: 0;
   padding: 3px 10px;
@@ -963,4 +966,4 @@ html[lang="en"] .float.ng { font-size: .8rem; }
 .legal a { color: var(--ink); }
 
 /* アプリ版：バナー広告を出している間は、画面の下をあける */
-body.ad-banner { padding-bottom: 64px; }
+body.ad-banner { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
