@@ -143,6 +143,8 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
 
 5. Regulated content / third-party material: The game is not in a regulated industry. All graphics, sounds and text are original. The game does not encourage eating wild plants; the title screen warns players not to pick or eat anything they cannot identify with certainty.
+
+6. Originality (Guideline 4.3): This is an original game, not a reskin or a template-based variation of our other apps. Its game system was designed and programmed specifically for this title: the real-time field where plants and mushrooms sprout and wither, the lookalike-based spawning and difficulty curve, the hunter's orders, lives and continue system, and the two stages (Herbs and Mushrooms). The 200 species, their identification notes, the procedurally drawn illustrations of each species, the field guide, and the sound effects and music were all created from scratch for this game. It differs from our other apps in genre, gameplay, content and visuals. Only standard technical parts, such as the Capacitor app shell and the AdMob ad integration, are shared across our apps.
 ```
 
 入力が終わったら「審査用に追加」→「審査へ提出」。
