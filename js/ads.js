@@ -26,7 +26,7 @@ window.Ads = (() => {
       },
       // 本番の広告ユニット(AdMob の iOS アプリ「食べるな危険」)。空の種類は出さない
       production: {
-        interstitial: '',
+        interstitial: 'ca-app-pub-6411535997477460/3480283189',
         rewarded: '',
         banner: 'ca-app-pub-6411535997477460/7419528196',
       },
