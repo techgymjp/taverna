@@ -24,10 +24,10 @@ window.Ads = (() => {
         rewarded: 'ca-app-pub-3940256099942544/1712485313',
         banner: 'ca-app-pub-3940256099942544/2934735716',
       },
-      // 本番の広告ユニット(AdMob の iOS アプリ「食べるな危険」)。空の種類は出さない
+      // 本番の広告ユニット(AdMob の iOS アプリ「食べるな危険」)
       production: {
         interstitial: 'ca-app-pub-6411535997477460/3480283189',
-        rewarded: '',
+        rewarded: 'ca-app-pub-6411535997477460/5256574299',
         banner: 'ca-app-pub-6411535997477460/7419528196',
       },
     },
