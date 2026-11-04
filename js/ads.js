@@ -18,14 +18,18 @@ window.Ads = (() => {
         banner: 'ca-app-pub-6411535997477460/2533661891',
       },
     },
-    // iOS 版はまだない(作るときに AdMob の iOS アプリの広告ユニットを入れる)
     ios: {
       test: {
         interstitial: 'ca-app-pub-3940256099942544/4411468910',
         rewarded: 'ca-app-pub-3940256099942544/1712485313',
         banner: 'ca-app-pub-3940256099942544/2934735716',
       },
-      production: { interstitial: '', rewarded: '', banner: '' },
+      // 本番の広告ユニット(AdMob の iOS アプリ「食べるな危険」)。空の種類は出さない
+      production: {
+        interstitial: '',
+        rewarded: '',
+        banner: 'ca-app-pub-6411535997477460/7419528196',
+      },
     },
   };
   const RETRY_MS = 20000;      // 読み込みに失敗したら少し待って再挑戦する
