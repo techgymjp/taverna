@@ -873,6 +873,8 @@
 
   // タイトル画面の下に、プライバシーポリシーと（EU など必要な地域では）広告の設定を出す。アプリではバージョンも出す
   $('privacy-link').href = T('privacyUrl');
+  // Web 版だけ、Android アプリ（Google Play）へのリンクを出す（アプリの中では出さない）
+  $('store-link').hidden = NATIVE;
   if (window.APP_VERSION && window.APP_VERSION !== 'dev') document.querySelector('.version').textContent = window.APP_VERSION;
   Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('ad-privacy').hidden = false; });
   $('ad-privacy-link').addEventListener('click', (e) => { e.preventDefault(); Ads.showPrivacyOptions(); });

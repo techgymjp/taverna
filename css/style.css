@@ -967,3 +967,18 @@ html[lang="en"] .float.ng { font-size: .8rem; }
 
 /* アプリ版：バナー広告を出している間は、画面の下をあける */
 body.ad-banner { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+
+/* Web 版だけ：Android アプリ（Google Play）へのリンク */
+.store-link { margin: 14px 0 0; font-weight: 900; }
+.store-link a {
+  display: inline-block;
+  padding: 6px 16px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.store-link a:hover { transform: translate(-1px, -2px); }
+.store-link small { display: block; margin-top: 6px; font-size: .68rem; font-weight: 800; color: var(--muted); }

@@ -16,14 +16,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=24">
+  <link rel="stylesheet" href="css/style.css?v=25">
 </head>
 <body>
   <div class="leaves" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
   </div>
 
-  <p class="version" data-i18n-title="versionTitle" title="このバージョンが表示されていれば最新です">ver.24</p>
+  <p class="version" data-i18n-title="versionTitle" title="このバージョンが表示されていれば最新です">ver.25</p>
 
   <div class="sound-toggles">
     <button type="button" class="toggle lang" id="tg-lang" data-i18n="langBtn">🌐 English</button>
@@ -57,6 +57,11 @@
         <button class="btn" id="btn-ranking" data-i18n="rankingBtn">🏆 ランキング</button>
         <button class="btn" id="btn-zukan" data-i18n="zukanBtn">📖 野草・きのこ図鑑</button>
       </div>
+      <!-- Web 版だけ：Android アプリ（Google Play）へのリンク。アプリの中では出さない -->
+      <p class="store-link" id="store-link" hidden>
+        <a href="https://play.google.com/store/apps/details?id=jp.techgym.taverna" target="_blank" rel="noopener" data-i18n="playStoreLink">📱 Android アプリ版（Google Play）</a>
+        <small data-i18n="playStoreTm">Google Play および Google Play ロゴは Google LLC の商標です。</small>
+      </p>
       <p class="best" id="best-score"></p>
       <p class="sound-test"><button type="button" class="btn small" id="btn-sound-test" data-i18n="soundTest">🔊 音のテスト</button><span id="sound-test-result" role="status"></span></p>
       <p class="legal"><a href="https://techgym.jp/privacy-policy/" id="privacy-link" target="_blank" rel="noopener" data-i18n="privacy">プライバシーポリシー</a><span id="ad-privacy" hidden> ・ <a href="#" id="ad-privacy-link" data-i18n="adSettings">広告の設定</a></span></p>
@@ -164,15 +169,15 @@
 
   <div class="confetti" id="confetti" aria-hidden="true"></div>
 
-  <script src="js/i18n.js?v=24"></script>
-  <script src="js/data.js?v=24"></script>
-  <script src="js/data-en.js?v=24"></script>
-  <script src="js/art.js?v=24"></script>
-  <script src="js/sound.js?v=24"></script>
-  <script src="js/build-info.js?v=24"></script>
-  <script src="js/ads-config.js?v=24"></script>
-  <script src="js/ads.js?v=24"></script>
-  <script src="js/ranking.js?v=24"></script>
-  <script src="js/game.js?v=24"></script>
+  <script src="js/i18n.js?v=25"></script>
+  <script src="js/data.js?v=25"></script>
+  <script src="js/data-en.js?v=25"></script>
+  <script src="js/art.js?v=25"></script>
+  <script src="js/sound.js?v=25"></script>
+  <script src="js/build-info.js?v=25"></script>
+  <script src="js/ads-config.js?v=25"></script>
+  <script src="js/ads.js?v=25"></script>
+  <script src="js/ranking.js?v=25"></script>
+  <script src="js/game.js?v=25"></script>
 </body>
 </html>
