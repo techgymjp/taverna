@@ -70,10 +70,11 @@
   - 起動時に Google の同意確認（EU など）。必要な地域ではタイトル画面に「広告の設定」が出る
   - 動作確認用 APK はテスト広告、Google Play 用の AAB だけ本番広告（`ADMOB_MODE=production`）
 - タイトル画面の左上にバージョン（`v1.0.0 (build 12)` など）、下にプライバシーポリシーへのリンク
+- **Web 版だけの部分はアプリに入れない**：Google Play へのリンクなどは `index.html` では `<!-- web-only -->` 〜 `<!-- /web-only -->`、JS では `// web-only:start` 〜 `// web-only:end` で囲む。アプリ用のビルド（`npm run build:app`。`android:sync`・`ios:sync`・`ios:release` と GitHub Actions が使う）は、`www/` にコピーするときにその範囲を取り除き、`play.google.com` が残っていたら止まる。アプリの中で隠す処理を入れると、iOS の審査で「審査中に隠した機能」（Guideline 5.6）と見なされることがあるため
 
 GitHub Actions（`.github/workflows/android.yml`）が push のたびに次を行います。
 
-1. `npm ci` → `npm run build`（`www/` にゲームをコピー）→ `npx cap sync android` → デバッグ APK をビルド
+1. `npm ci` → `npm run build:app`（`www/` にゲームをコピー。Web 版だけの部分は取り除く）→ `npx cap sync android` → デバッグ APK をビルド
 2. 既定ブランチなら、Release `android-latest` の `taverna.apk` を差し替え（動作確認用・テスト広告）
    - リリース画面: https://github.com/techgymjp/taverna/releases/tag/android-latest（QR コード: `docs/apk-qr.png`）
    - APK 直接: https://github.com/techgymjp/taverna/releases/latest/download/taverna.apk
