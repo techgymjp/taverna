@@ -13,9 +13,9 @@ window.Ads = (() => {
       },
       // 本番の広告ユニット(AdMob の Android アプリ「食べるな危険」)
       production: {
-        interstitial: 'ca-app-pub-6411535997477460/7628582617',
+        interstitial: 'ca-app-pub-6411535997477460/4115260317',
         rewarded: 'ca-app-pub-6411535997477460/6089763523',
-        banner: 'ca-app-pub-6411535997477460/2533661891',
+        banner: 'ca-app-pub-6411535997477460/9367586997',
       },
     },
     ios: {
